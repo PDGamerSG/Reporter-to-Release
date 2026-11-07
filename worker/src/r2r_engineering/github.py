@@ -83,7 +83,7 @@ class GitHubPublisher:
                     "parents": [base],
                     "author": {
                         "name": "Vulcan Engineering Bot",
-                        "email": "engineering@users.noreply.github.com",
+                        "email": "engineering-bot@reporter-to-release.pallabdas.me",
                     },
                 },
             )
