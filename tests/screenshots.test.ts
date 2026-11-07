@@ -132,6 +132,16 @@ describe("report screenshots", () => {
     ).toEqual([]);
   });
 
+  it("accepts a limited key in place of a role", async () => {
+    vi.unstubAllEnvs();
+    vi.stubEnv("SCREENSHOT_BUCKET", "bucket");
+    vi.stubEnv("SCREENSHOT_AWS_ACCESS_KEY_ID", "test-id");
+    vi.stubEnv("SCREENSHOT_AWS_SECRET_ACCESS_KEY", "test-secret");
+    const store = new MemoryStore();
+    const { reportId, trackingToken } = await file(store);
+    expect((await upload(store, reportId, trackingToken)).status).toBe(201);
+  });
+
   it("is off without configuration and hidden from the public", async () => {
     const store = new MemoryStore();
     const { reportId, trackingToken } = await file(store);
