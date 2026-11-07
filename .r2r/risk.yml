@@ -1,0 +1,10 @@
+tiers:
+  - tier: 2
+    description: Two humans including a code owner
+    paths: ["**/auth/**", "**/payments/**", "**/billing/**", "migrations/**", ".github/**"]
+  - tier: 1
+    description: Agent review and one human owner
+    paths: ["src/**", "worker/**"]
+  - tier: 0
+    description: One human owner
+    paths: ["docs/**", "**/*.md"]

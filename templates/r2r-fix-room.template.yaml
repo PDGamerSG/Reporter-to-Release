@@ -1,0 +1,41 @@
+version: 1
+params:
+  bug:
+    type: string
+    description: Confirmed ledger bug identifier
+    pattern: "R2R-[0-9]+"
+  provider:
+    type: provider
+    default: [codex, claude, opencode]
+  location:
+    type: location
+    default: local
+  directory:
+    type: directory
+    default: "{$agents_dir}/{agent}"
+  bridge:
+    type: bridge
+    default: [$first]
+agents:
+  - name: "fixer-{bug}"
+    description: Makes the reporter-confirmed regression pass
+    addressing: owner-agents
+    provider: "{provider}"
+    location: "{location}"
+    directory: "{directory}"
+    instructions: |
+      Fix {bug} in an isolated git worktree. Read only the sanitized dossier and
+      confirmed reproduction. Run the failing regression before editing. Change
+      the smallest responsible code, run the regression and relevant existing
+      checks, and open a draft pull request with exact evidence. Never merge.
+      If the test is wrong, return it to the reproducer once. Do not weaken it.
+      Submit /r2r structured evidence to the concierge through engineering.
+rooms:
+  - name: "Fix {bug}"
+    description: Isolated fix room for a reporter-confirmed bug
+    bridge: "{bridge}"
+    agents: ["fixer-{bug}"]
+    users: ["{$creator}"]
+    kickoff: |
+      @fixer-{bug} wait for the confirmed dossier and failing regression.
+      Human review is mandatory. Do not merge the pull request.

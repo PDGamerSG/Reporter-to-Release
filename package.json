@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "demo:reproduce": "node --import tsx scripts/reproduce.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "check": "npm run typecheck && npm run lint && npm test",
