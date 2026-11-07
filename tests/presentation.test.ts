@@ -67,3 +67,22 @@ it("never presents a live engineering heartbeat as demonstration evidence", () =
   expect(integration?.status).toBe("demo");
   expect(JSON.stringify(integration)).not.toContain("private-configured-model");
 });
+
+it("shows real Switch and GitHub health in the demo", () => {
+  const live = emptyLedger();
+  live.workerHeartbeat = {
+    at: new Date().toISOString(),
+    roomsConnected: 2,
+    version: "1.1.0",
+  };
+  live.githubLastEventAt = "2026-11-07T12:00:00.000Z";
+  const status = (id: string, source = live) =>
+    presentWorkspace(emptyLedger(), "demo", source).integrations.find(
+      (i) => i.id === id,
+    )?.status;
+  expect(status("switch")).toBe("connected");
+  expect(status("github")).toBe("connected");
+  expect(status("engineering")).toBe("demo");
+  live.workerHeartbeat.at = new Date(Date.now() - 120000).toISOString();
+  expect(status("switch")).toBe("disconnected");
+});

@@ -47,6 +47,11 @@ async function initializeDemo(store: Store, ctx: Context) {
     if (ledger.revision === 0) Object.assign(ledger, seedDemo());
   });
 }
+async function workspaceView(store: Store, ctx: Context) {
+  const { ledger } = await store.read(ctx.key);
+  const live = ctx.mode === "live" ? ledger : (await store.read("live")).ledger;
+  return presentWorkspace(ledger, ctx.mode, live);
+}
 function requireWorker(request: Request) {
   const supplied =
     request.headers.get("authorization")?.replace(/^Bearer /, "") ?? "";
@@ -538,11 +543,7 @@ export async function handleApi(
 
     await initializeDemo(store, ctx);
     if (parts[0] === "workspace" && method === "GET")
-      return json(
-        presentWorkspace((await store.read(ctx.key)).ledger, ctx.mode),
-        200,
-        ctx,
-      );
+      return json(await workspaceView(store, ctx), 200, ctx);
     if (parts[0] === "reports" && parts[2] === "screenshots" && parts[3]) {
       if (method !== "GET") throw new DomainError("Use GET.", 405);
       owner(ctx);
@@ -626,10 +627,7 @@ export async function handleApi(
       return json({ ok: true });
     }
     if (parts[0] === "export" && method === "GET") {
-      const workspace = presentWorkspace(
-        (await store.read(ctx.key)).ledger,
-        ctx.mode,
-      );
+      const workspace = await workspaceView(store, ctx);
       const response = json(
         { exportedAt: new Date().toISOString(), ...workspace },
         200,
