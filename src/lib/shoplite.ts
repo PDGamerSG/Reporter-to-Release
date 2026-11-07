@@ -14,6 +14,8 @@ export function calculateTotal(
   )
     throw new Error("Use a valid price and a quantity between 1 and 99.");
   const subtotal = Math.round(price * 100) * quantity;
+  if (!Number.isSafeInteger(subtotal))
+    throw new Error("Use a valid price and a quantity between 1 and 99.");
   const code = coupon.trim().toUpperCase();
   const discount =
     code === "SAVE300"
