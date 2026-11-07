@@ -19,7 +19,9 @@ type ImageType = keyof typeof extensions;
 
 export function screenshotsConfigured() {
   return Boolean(
-    process.env.SCREENSHOT_BUCKET && process.env.SCREENSHOT_ROLE_ARN,
+    process.env.SCREENSHOT_BUCKET &&
+    (process.env.SCREENSHOT_AWS_ACCESS_KEY_ID ||
+      process.env.SCREENSHOT_ROLE_ARN),
   );
 }
 
@@ -77,12 +79,19 @@ export function releaseScreenshot(
 
 function client() {
   const region = process.env.SCREENSHOT_REGION ?? "ap-southeast-2";
+  const accessKeyId = process.env.SCREENSHOT_AWS_ACCESS_KEY_ID;
   return new S3Client({
     region,
-    credentials: awsCredentialsProvider({
-      roleArn: process.env.SCREENSHOT_ROLE_ARN!,
-      clientConfig: { region },
-    }),
+    // A limited key is for accounts whose organization blocks OIDC providers.
+    credentials: accessKeyId
+      ? {
+          accessKeyId,
+          secretAccessKey: process.env.SCREENSHOT_AWS_SECRET_ACCESS_KEY!,
+        }
+      : awsCredentialsProvider({
+          roleArn: process.env.SCREENSHOT_ROLE_ARN!,
+          clientConfig: { region },
+        }),
   });
 }
 
