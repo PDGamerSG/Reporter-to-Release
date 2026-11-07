@@ -1,7 +1,7 @@
 """Run on the Switch host. Creates owned rooms; keeps credentials private.
 
-The engineering manager is a registered destination. Attach a provider runtime
-through Switch Console before expecting it to execute engineering work.
+The engineering service attaches four bounded model runtimes separately from
+the concierge. Registration credentials remain on the host.
 """
 
 import http.cookiejar
@@ -70,7 +70,13 @@ def main():
         ),
         (
             "vulcan-manager",
-            "Engineering dossier destination; provider runtime configured separately",
+            "AWS engineering manager; human merge and reporter confirmation remain required",
+        ),
+        ("vulcan-reproducer", "Model reproducer with networkless test execution"),
+        ("vulcan-fixer", "Model fixer restricted to the confirmed ShopLite defect"),
+        (
+            "vulcan-reviewer",
+            "Independent advisory model reviewer; cannot approve or merge",
         ),
         ("vulcan-smoke", "Isolated deployment acceptance test identity"),
     ]:
@@ -117,6 +123,12 @@ def main():
                 bearer=concierge["api_key"],
             )["result"]
             state[key] = room.get("room_id") or room["id"]
+    for role in ["manager", "reproducer", "fixer", "reviewer"]:
+        call(
+            f"/agents/{concierge['id']}/ops/invite_agent_to_room",
+            {"room_id": state["engineering_room"], "agent_name": "vulcan-" + role},
+            bearer=concierge["api_key"],
+        )
     call(
         f"/gateway/agents/{concierge['id']}/addressing-policy",
         {
@@ -155,6 +167,22 @@ def main():
     )
     worker_env.write_text("".join(f"{key}={value}\n" for key, value in values.items()))
     worker_env.chmod(0o600)
+    engineering_env = root / "engineering.env"
+    if engineering_env.exists():
+        engineering_values = {
+            line.split("=", 1)[0]: line.split("=", 1)[1]
+            for line in engineering_env.read_text().splitlines()
+            if "=" in line
+        }
+        engineering_values["SWITCH_ENGINEERING_ROOM"] = state["engineering_room"]
+        for role in ["manager", "reproducer", "fixer", "reviewer"]:
+            credential = state["vulcan-" + role]
+            engineering_values[f"SWITCH_{role.upper()}_ID"] = credential["id"]
+            engineering_values[f"SWITCH_{role.upper()}_KEY"] = credential["api_key"]
+        engineering_env.write_text(
+            "".join(f"{key}={value}\n" for key, value in engineering_values.items())
+        )
+        engineering_env.chmod(0o600)
     print(
         "Switch identities and two owned rooms configured; credentials saved privately."
     )

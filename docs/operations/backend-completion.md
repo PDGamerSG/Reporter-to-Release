@@ -2,7 +2,7 @@
 
 This extends the November 7 web-first release. Frontend and AI-triage work can proceed independently; these changes preserve their contracts.
 
-The AWS engineering service uses Bedrock through the EC2 role. A successful invocation of `qwen.qwen3-coder-30b-a3b-v1:0` in `us-east-1` established access; catalog listings alone did not. Other probed providers were unavailable, so no multiple-provider execution is claimed.
+The engineering service runs on AWS and uses the project's configured Meta Model API credential with `muse-spark-1.3`. A small Bedrock readiness call succeeded, but subsequent real-work probes were rejected by the account's daily token quota. The optional native Bedrock adapter remains available through the EC2 role; it is not the active provider. No multiple-provider execution is claimed.
 
 The manager, reproducer, fixer, and reviewer have separate Switch identities. Work is restricted to ShopLite's calculation module and a per-bug regression test. Sanitized work snapshots exclude reporter identities, tracking capabilities, routes, and raw hashes. A separate engineering bearer can read work, record engineering actions, and leave operational notes; it cannot confirm reports, approve, merge, or record deployment.
 
