@@ -17,6 +17,16 @@ def test_only_allowlisted_agent_can_submit_a_command():
     assert command == ("R2R-0001", {"type": "start_fix"})
 
 
+def test_native_targeted_command_uses_the_bound_transport_identity():
+    body = '@vulcan-concierge /r2r {"type":"start_fix","bugId":"R2R-0002"}'
+    native = "@switch-agent-bound:localhost"
+    assert parse_engineering_command(body, native, {native}) == (
+        "R2R-0002",
+        {"type": "start_fix"},
+    )
+    assert parse_engineering_command(body, "unbound-agent", {native}) is None
+
+
 def test_worker_never_accepts_a_human_approval_from_a_chat_command():
     assert (
         parse_engineering_command(

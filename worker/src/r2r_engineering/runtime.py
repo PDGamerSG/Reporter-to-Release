@@ -38,12 +38,19 @@ log = logging.getLogger("r2r-engineering")
 ROLES = ("manager", "reproducer", "fixer", "reviewer")
 
 
-def handoff_matches(message, sender, recipient, body):
-    # Native Switch targeted messages prepend the addressed name.
+def handoff_matches(message, event_id, recipient, body):
+    # The authenticated send receipt binds the UUID actor to its native event.
+    # Native message.sender is a transport ID, not the registered agent UUID.
     text = re.sub(
         r"^@" + re.escape(recipient) + r"\s+", "", message.body.strip(), count=1
     )
-    return message.sender == sender and text == body
+    return (
+        isinstance(event_id, str)
+        and bool(event_id)
+        and getattr(message, "message_id", None) == event_id
+        and getattr(message, "addressed", False) is True
+        and text == body
+    )
 
 
 def bounded(value, limit):
@@ -145,14 +152,14 @@ class Runtime:
             task = "/engineering-task " + json.dumps(
                 {"bugId": bug, "stage": stage, "taskId": str(uuid.uuid4())}
             )
-            await connections["manager"].send_targeted_message(
+            delivery = await connections["manager"].send_targeted_message(
                 task, target_names=["vulcan-" + role]
             )
 
             async def receive():
                 async for message in connections[role].messages():
                     if handoff_matches(
-                        message, manager.agent_id, "vulcan-" + role, task
+                        message, delivery.get("event_id"), "vulcan-" + role, task
                     ):
                         return
                 raise ValueError(
@@ -203,7 +210,7 @@ class Runtime:
 
     async def review(self, connections, bug, instruction, evidence):
         task_id = str(uuid.uuid4())
-        await connections["manager"].send_targeted_message(
+        delivery = await connections["manager"].send_targeted_message(
             "/engineering-review " + task_id, target_names=["vulcan-reviewer"]
         )
 
@@ -211,7 +218,7 @@ class Runtime:
             async for message in connections["reviewer"].messages():
                 if handoff_matches(
                     message,
-                    self.clients["manager"].agent_id,
+                    delivery.get("event_id"),
                     "vulcan-reviewer",
                     "/engineering-review " + task_id,
                 ):
@@ -274,6 +281,9 @@ class Runtime:
             steps = [bounded(step, 200) for step in steps]
             source = bounded(result.get("testSource"), 16_000)
             apply_files(path, {test_path: source}, {test_path})
+            formatted = await asyncio.to_thread(self.sandbox.format, path, [test_path])
+            apply_files(path, formatted, {test_path})
+            source = (path / test_path).read_text()
             failing = await asyncio.to_thread(self.sandbox.run, path, [test_path])
             if not is_assertion_failure(failing):
                 raise ValueError(
@@ -282,7 +292,7 @@ class Runtime:
             review, review_usage = await self.review(
                 room,
                 bug,
-                "Check that this test honestly reproduces the reporter's stated behavior in the normal implementation. Reject invented requirements, seeded-demo fixes, tautological or forced failures, syntax/import errors, irrelevant assertions, and unsafe test operations.",
+                "Check that this regression test invokes the normal implementation and asserts the reporter's explicitly stated expected behavior. A regression assertion should fail on the current buggy implementation; asserting the observed buggy result instead would incorrectly pass. The dossier.expected field is the reporter's requirement, not an invented requirement. Verify the measured failure comes from that behavior. Reject requirements absent from the dossier, seeded-demo fixes, tautological or forced failures, syntax/import errors, irrelevant assertions, and unsafe test operations.",
                 {
                     "dossier": cluster["dossier"],
                     "implementation": (path / SOURCE_PATH).read_text(),
@@ -400,6 +410,10 @@ class Runtime:
                 summary = bounded(result.get("summary"), 1000)
                 files = result.get("files")
                 apply_files(path, files, {SOURCE_PATH})
+                formatted = await asyncio.to_thread(
+                    self.sandbox.format, path, [SOURCE_PATH, test_path]
+                )
+                apply_files(path, formatted, {SOURCE_PATH, test_path})
                 regression = await asyncio.to_thread(
                     self.sandbox.run, path, [test_path]
                 )
@@ -408,9 +422,20 @@ class Runtime:
                     if regression["exitCode"] == 0
                     else regression
                 )
-                if regression["exitCode"] == 0 and full_suite["exitCode"] == 0:
+                quality = (
+                    await asyncio.to_thread(
+                        self.sandbox.validate, path, [SOURCE_PATH, test_path]
+                    )
+                    if full_suite["exitCode"] == 0
+                    else full_suite
+                )
+                if (
+                    regression["exitCode"] == 0
+                    and full_suite["exitCode"] == 0
+                    and quality["exitCode"] == 0
+                ):
                     break
-                feedback = full_suite["output"]
+                feedback = quality["output"]
             else:
                 raise ValueError(
                     "The fix did not pass its regression and existing unit suite within two attempts."
@@ -426,6 +451,7 @@ class Runtime:
                     "unchangedRegression": reproduction["testSource"],
                     "measuredRegression": regression["output"],
                     "measuredUnitSuite": full_suite["output"],
+                    "measuredQualityChecks": quality["output"],
                 },
             )
             output = (
@@ -433,10 +459,12 @@ class Runtime:
                 + regression["output"]
                 + "\nEXISTING SUITE\n"
                 + full_suite["output"]
+                + "\nFORMAT, LINT AND TYPES\n"
+                + quality["output"]
             )[:4900]
             patch = {
                 SOURCE_PATH: (path / SOURCE_PATH).read_text(),
-                test_path: reproduction["testSource"],
+                test_path: (path / test_path).read_text(),
             }
             prepared = {
                 "files": patch,

@@ -12,10 +12,13 @@ AGENT_ACTIONS = {
 
 
 def parse_engineering_command(body: str, sender: str | None, allowed: set[str]):
-    if not sender or sender not in allowed or not body.strip().startswith("/r2r "):
+    if not sender or sender not in allowed:
+        return None
+    text = re.sub(r"^@vulcan-concierge\s+", "", body.strip(), count=1)
+    if not text.startswith("/r2r "):
         return None
     try:
-        data = json.loads(body.strip()[5:])
+        data = json.loads(text[5:])
         bug_id = data.pop("bugId")
         if (
             not re.fullmatch(r"R2R-\d{4,}", bug_id)
