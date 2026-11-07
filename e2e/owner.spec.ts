@@ -10,7 +10,7 @@ test("owner sign-in opens live state and sign-out returns to the private demo", 
     !process.env.ADMIN_TOKEN,
     "An isolated server owner key is required",
   );
-  await page.goto("/");
+  await page.goto("/desk");
   await page
     .getByRole("button", { name: "Open live workspace", exact: true })
     .click();

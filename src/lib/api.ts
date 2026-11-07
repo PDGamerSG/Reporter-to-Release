@@ -1,9 +1,11 @@
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
+import { aiConfigured, aiLimits, renderTriage, runTriage } from "./ai/triage";
 import { advanceDemo, seedDemo } from "./demo";
 import { digest, renderDossier, safeReporterText } from "./domain/airlock";
 import { acknowledgeJob, claimJobs } from "./domain/outbox";
-import { DomainError, execute, intake } from "./domain/workflow";
+import type { Report } from "./domain/types";
+import { audit, DomainError, execute, intake } from "./domain/workflow";
 import {
   checkOrigin,
   context,
@@ -13,7 +15,11 @@ import {
   type Context,
 } from "./http";
 import { githubRequest, githubWebhook } from "./integrations/github";
-import { presentReporterCluster, presentWorkspace } from "./presentation";
+import {
+  presentReporterCluster,
+  presentTriage,
+  presentWorkspace,
+} from "./presentation";
 import { commandSchema, reporterAnswerSchema, reportSchema } from "./schemas";
 import { constantEqual, identity, sessionSecret, signValue } from "./security";
 import { getStore, mutate, type Store } from "./store";
@@ -38,6 +44,85 @@ function owner(ctx: Context) {
     );
 }
 
+function clientOf(request: Request, ctx: Context) {
+  return identity(
+    "ai",
+    request.headers.get("x-forwarded-for")?.split(",")[0] ?? ctx.id,
+  );
+}
+function intakeResult(report: Report, token: string, mode: "demo" | "live") {
+  return {
+    reportId: report.id,
+    clusterId: report.clusterId,
+    trackingToken: token,
+    mode,
+    quarantined: report.dossier.safety.quarantined,
+    redacted: report.dossier.safety.piiRedacted,
+  };
+}
+
+/** Runs once per bug: duplicates reuse the stored triage and spend nothing. */
+async function triageReport(
+  request: Request,
+  store: Store,
+  key: string,
+  report: Report,
+  ctx: Context,
+) {
+  const cluster = (await store.read(key)).ledger.clusters[report.clusterId];
+  if (cluster.state === "quarantined")
+    throw new DomainError(
+      "This report is held for human safety review, so AI triage is skipped.",
+      409,
+    );
+  if (cluster.triage)
+    return json(
+      { triage: presentTriage(cluster.triage), reused: true },
+      200,
+      ctx,
+    );
+  const triage = await runTriage(
+    store,
+    cluster.dossier,
+    clientOf(request, ctx),
+  );
+  const saved = await mutate(store, key, (ledger) => {
+    const current = ledger.clusters[cluster.id];
+    if (current.triage) return current;
+    current.triage = triage;
+    audit(
+      ledger,
+      current,
+      "ai_triage",
+      "AI triage added",
+      "An advisory analysis was attached for human review.",
+      "Concierge",
+    );
+    return current;
+  });
+  if (key === "live" && saved.githubIssue)
+    await commentOnIssue(saved.githubIssue.number, renderTriage(triage));
+  return json(
+    { triage: presentTriage(saved.triage!), reused: false },
+    200,
+    ctx,
+  );
+}
+
+async function commentOnIssue(issue: number, body: string) {
+  const repository = process.env.GITHUB_REPOSITORY;
+  if (!repository) return;
+  try {
+    await githubRequest(`/repos/${repository}/issues/${issue}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ body }),
+    });
+  } catch {
+    // The triage is already saved. A missed comment must not fail the reporter.
+    console.warn("Could not add AI triage to the GitHub issue.");
+  }
+}
+
 async function createIssue(store: Store, id: string) {
   const cluster = (await store.read("live")).ledger.clusters[id];
   if (!cluster || cluster.state === "quarantined")
@@ -60,7 +145,7 @@ async function createIssue(store: Store, id: string) {
         method: "POST",
         body: JSON.stringify({
           title: `[${id}] ${cluster.title}`,
-          body: `${renderDossier(cluster.dossier)}\n\nReporter-to-Release ledger: ${id}\nOnly sanitized report facts are included. Human review and reporter confirmation are required.`,
+          body: `${renderDossier(cluster.dossier)}\n\nReporter-to-Release ledger: ${id}\nOnly sanitized report facts are included. Human review and reporter confirmation are required.${cluster.triage ? `\n\n${renderTriage(cluster.triage)}` : ""}`,
         }),
       })
     ).json());
@@ -208,7 +293,8 @@ export async function handleApi(
         status: "ok",
         service: "Reporter-to-Release",
         storage: process.env.DATABASE_URL ? "postgres" : "local",
-        version: "1.0.0",
+        version: "1.1.0",
+        ai: aiConfigured() ? "configured" : "disconnected",
       });
     }
     if (parts.join("/") === "webhooks/github" && method === "POST")
@@ -278,6 +364,11 @@ export async function handleApi(
           "This tracking link is invalid or has expired. Use the complete private link you received.",
           403,
         );
+      if (parts[2] === "triage") {
+        if (method !== "POST")
+          throw new DomainError("Use POST to request triage.", 405);
+        return await triageReport(request, store, key, report, ctx);
+      }
       if (method === "POST") {
         const answer = reporterAnswerSchema.parse(await readJson(request));
         await mutate(store, key, (ledger) =>
@@ -349,17 +440,21 @@ export async function handleApi(
         throw new DomainError(
           "This report is already recorded. Please use your existing tracking link.",
         );
-      return json(
-        {
-          reportId: report.id,
-          clusterId: report.clusterId,
-          trackingToken: token,
-          mode: "live",
-          quarantined: report.dossier.safety.quarantined,
-        },
-        201,
-        ctx,
-      );
+      return json(intakeResult(report, token, "live"), 201, ctx);
+    }
+
+    if (parts.join("/") === "ai/usage" && method === "GET") {
+      owner(ctx);
+      const usage = (await store.read("ai:usage")).ledger.aiUsage;
+      return json({
+        configured: aiConfigured(),
+        budgetUsd: aiLimits().budgetMicros / 1_000_000,
+        spentUsd: (usage?.spentMicros ?? 0) / 1_000_000,
+        calls: usage?.calls ?? 0,
+        inputTokens: usage?.inputTokens ?? 0,
+        cachedTokens: usage?.cachedTokens ?? 0,
+        outputTokens: usage?.outputTokens ?? 0,
+      });
     }
 
     await initializeDemo(store, ctx);
@@ -383,21 +478,17 @@ export async function handleApi(
           tokenHash: digest(token),
         }),
       );
-      if (report.tokenHash !== digest(token))
-        throw new DomainError(
-          "This report is already recorded. Use your existing tracking link.",
-        );
-      return json(
-        {
-          reportId: report.id,
-          clusterId: report.clusterId,
-          trackingToken: token,
-          mode: ctx.mode,
-          quarantined: report.dossier.safety.quarantined,
-        },
-        201,
-        ctx,
-      );
+      if (report.tokenHash !== digest(token)) {
+        if (ctx.mode !== "demo")
+          throw new DomainError(
+            "This report is already recorded. Use your existing tracking link.",
+          );
+        // A visitor can rerun a sample in their own throwaway workspace.
+        await mutate(store, ctx.key, (ledger) => {
+          ledger.reports[report.id].tokenHash = digest(token);
+        });
+      }
+      return json(intakeResult(report, token, ctx.mode), 201, ctx);
     }
     if (parts[0] === "demo" && parts[1] === "reset" && method === "POST") {
       if (ctx.mode !== "demo")
