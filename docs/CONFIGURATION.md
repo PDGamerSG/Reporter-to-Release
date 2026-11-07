@@ -74,6 +74,8 @@ Generated tests and implementation code receive no environment credentials. Thei
 
 [setup-switch-host.sh](../scripts/setup-switch-host.sh) accepts `R2R_SWITCH_HOST` and `R2R_ADMIN_EMAIL`. It generates the upstream Switch secrets on a fresh host and preserves an existing `.env`. The upstream Switch server has its own database, admin credentials, and keyring. These are separate from the application's ledger and session secret.
 
-Telegram and Slack are deferred by the project scope. Add their credentials through Switch Console when enabling bridges. The current example file deliberately requests no chat tokens. Do not expose a new public bridge to engineering agents without checking room membership and addressing policies.
+Telegram updates need `TELEGRAM_BOT_USERNAME` and `TELEGRAM_WEBHOOK_SECRET` in Vercel, and `TELEGRAM_BOT_TOKEN` on the AWS worker. Register the webhook with that secret. Slack stays deferred; add its credentials through Switch Console when enabling it.
+
+Screenshots need `SCREENSHOT_BUCKET` and `SCREENSHOT_ROLE_ARN` in Vercel. The role trusts Vercel's OIDC issuer for this project's production environment and can only read and write `reports/*`, so no AWS key is stored. `scripts/setup-screenshot-role.sh` creates it. The upload control stays hidden until both values are set. The current example file deliberately requests no chat tokens. Do not expose a new public bridge to engineering agents without checking room membership and addressing policies.
 
 For local browser checks, set `E2E_BASE_URL` to the already-running server, for example `http://127.0.0.1:3107`. The Playwright configuration loads `.env.local`; owner sign-in tests skip when `ADMIN_TOKEN` is absent. CI uses isolated placeholder secrets and no production database.

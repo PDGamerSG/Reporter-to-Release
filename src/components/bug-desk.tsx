@@ -7,7 +7,14 @@ import {
   type FormEvent,
 } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Check, Copy, RotateCcw } from "lucide-react";
+import {
+  ArrowUpRight,
+  Check,
+  Copy,
+  ImagePlus,
+  RotateCcw,
+  X,
+} from "lucide-react";
 import type { ReporterTriage } from "@/lib/presentation";
 import styles from "./bug-desk.module.css";
 import { FieldNotes } from "./field-notes";
@@ -38,6 +45,7 @@ const samples = [
     text: "When I change the quantity of an item on my phone, the whole cart empties and I have to add everything again.",
   },
 ];
+const MAX_SHOT_BYTES = 4 * 1024 * 1024;
 const stops: { phase: Phase; label: string }[] = [
   { phase: "privacy", label: "Privacy check" },
   { phase: "triage", label: "AI triage" },
@@ -101,9 +109,11 @@ async function send<T>(url: string, init: RequestInit): Promise<T> {
 export function BugDesk({
   demo = false,
   initialText = "",
+  screenshots = false,
 }: {
   demo?: boolean;
   initialText?: string;
+  screenshots?: boolean;
 }) {
   const [text, setText] = useState(initialText);
   const [phase, setPhase] = useState<Phase>("idle");
@@ -112,6 +122,8 @@ export function BugDesk({
   const [triage, setTriage] = useState<ReporterTriage>();
   const [reused, setReused] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shot, setShot] = useState<File>();
+  const [shotFailed, setShotFailed] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const box = useRef<HTMLTextAreaElement>(null);
   const hydrated = useHydrated();
@@ -139,6 +151,30 @@ export function BugDesk({
       setPhase("saved");
     }
   }
+  async function uploadShot(report: Filed, file: File) {
+    // The report is already saved, so a failed upload must not lose it.
+    try {
+      const response = await fetch(`/api/track/${report.reportId}/screenshot`, {
+        method: "POST",
+        headers: {
+          "Content-Type": file.type,
+          "x-reporter-token": report.trackingToken,
+        },
+        body: file,
+      });
+      setShotFailed(!response.ok);
+    } catch {
+      setShotFailed(true);
+    }
+  }
+  function chooseShot(file?: File) {
+    if (file && file.size > MAX_SHOT_BYTES) {
+      setError("Use a screenshot under 4 MB.");
+      return;
+    }
+    setError("");
+    setShot(file);
+  }
   async function submit(event: FormEvent) {
     event.preventDefault();
     // Text typed before hydration is in the element but not yet in state.
@@ -158,6 +194,7 @@ export function BugDesk({
         },
       );
       setFiled(report);
+      if (shot && !report.quarantined) await uploadShot(report, shot);
       if (report.quarantined) setPhase("held");
       else await runTriage(report);
     } catch (e) {
@@ -173,6 +210,8 @@ export function BugDesk({
     setTriage(undefined);
     setReused(false);
     setCopied(false);
+    setShot(undefined);
+    setShotFailed(false);
   }
   const trackPath =
     filed &&
@@ -225,6 +264,35 @@ export function BugDesk({
                   }}
                 />
               </div>
+              {screenshots && !demo && !isSample && !finished && !busy && (
+                <div className={styles.attach}>
+                  <label className={styles.attachButton}>
+                    <ImagePlus size={17} aria-hidden="true" />
+                    <span>{shot ? shot.name : "Add a screenshot"}</span>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={(e) => chooseShot(e.target.files?.[0])}
+                    />
+                  </label>
+                  {shot && (
+                    <button
+                      type="button"
+                      className={styles.attachRemove}
+                      aria-label="Remove screenshot"
+                      onClick={() => setShot(undefined)}
+                    >
+                      <X size={16} aria-hidden="true" />
+                    </button>
+                  )}
+                  <p>Screenshots are not redacted. Hide passwords first.</p>
+                </div>
+              )}
+              {shotFailed && (
+                <p className={styles.error}>
+                  Your report is saved, but the screenshot was not.
+                </p>
+              )}
               {error && phase === "idle" && (
                 <p id="report-error" role="alert" className={styles.error}>
                   {error}

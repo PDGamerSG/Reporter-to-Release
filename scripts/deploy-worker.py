@@ -50,7 +50,14 @@ def main():
             )
     package = base64.b64encode(buffer.getvalue()).decode()
     private_env = base64.b64encode(
-        f"APP_URL={args.app_url.rstrip('/')}\nWORKER_TOKEN={token}\n".encode()
+        (
+            f"APP_URL={args.app_url.rstrip('/')}\nWORKER_TOKEN={token}\n"
+            + (
+                f"TELEGRAM_BOT_TOKEN={local_env['TELEGRAM_BOT_TOKEN']}\n"
+                if local_env.get("TELEGRAM_BOT_TOKEN")
+                else ""
+            )
+        ).encode()
     ).decode()
     script = "\n".join(
         [

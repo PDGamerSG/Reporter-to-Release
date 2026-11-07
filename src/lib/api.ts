@@ -17,6 +17,22 @@ import {
 } from "./http";
 import { githubRequest, githubWebhook } from "./integrations/github";
 import {
+  getScreenshot,
+  imageType,
+  MAX_SCREENSHOT_BYTES,
+  putScreenshot,
+  releaseScreenshot,
+  reserveScreenshot,
+  screenshotsConfigured,
+} from "./integrations/screenshots";
+import {
+  applyTelegramUpdate,
+  linkExpiry,
+  telegramConfigured,
+  telegramSecretValid,
+  telegramUrl,
+} from "./integrations/telegram";
+import {
   presentReporterCluster,
   presentTriage,
   presentWorkspace,
@@ -300,6 +316,23 @@ export async function handleApi(
     }
     if (parts.join("/") === "webhooks/github" && method === "POST")
       return await githubWebhook(request, store);
+    if (parts.join("/") === "telegram/webhook" && method === "POST") {
+      if (
+        !telegramSecretValid(
+          request.headers.get("x-telegram-bot-api-secret-token"),
+        )
+      )
+        throw new DomainError("Not found.", 404);
+      const body = await readJson(request);
+      const reply = await mutate(store, "live", (ledger) =>
+        applyTelegramUpdate(ledger, body),
+      );
+      return Response.json(
+        reply
+          ? { method: "sendMessage", chat_id: reply.chatId, text: reply.text }
+          : {},
+      );
+    }
     if (parts[0] === "worker") return await workerApi(request, parts, store);
     if (parts[0] === "engineering")
       return await engineeringApi(request, parts, store);
@@ -372,6 +405,47 @@ export async function handleApi(
           throw new DomainError("Use POST to request triage.", 405);
         return await triageReport(request, store, key, report, ctx);
       }
+      if (parts[2] === "telegram") {
+        if (method !== "POST")
+          throw new DomainError("Use POST to link Telegram.", 405);
+        if (key !== "live" || !telegramConfigured())
+          throw new DomainError("Telegram updates are not available.", 404);
+        const code = randomBytes(18).toString("base64url");
+        await mutate(store, key, (ledger) => {
+          ledger.reports[report.id].telegramLink = {
+            codeHash: digest(code),
+            expiresAt: linkExpiry(),
+          };
+        });
+        return json({ url: telegramUrl(code) }, 200, ctx);
+      }
+      if (parts[2] === "screenshot") {
+        if (method !== "POST")
+          throw new DomainError("Use POST to add a screenshot.", 405);
+        if (key !== "live" || !screenshotsConfigured())
+          throw new DomainError("Screenshots are not available.", 404);
+        const unsupported = "Use a PNG, JPEG or WebP image under 4 MB.";
+        if (
+          Number(request.headers.get("content-length")) > MAX_SCREENSHOT_BYTES
+        )
+          throw new DomainError(unsupported, 413);
+        const bytes = new Uint8Array(await request.arrayBuffer());
+        const type = imageType(bytes);
+        if (!type || bytes.length > MAX_SCREENSHOT_BYTES)
+          throw new DomainError(unsupported, 415);
+        const shot = await mutate(store, key, (ledger) =>
+          reserveScreenshot(ledger, report.id, type, bytes.length),
+        );
+        try {
+          await putScreenshot(shot, bytes);
+        } catch {
+          await mutate(store, key, (ledger) =>
+            releaseScreenshot(ledger, report.id, shot.key),
+          );
+          throw new DomainError("The screenshot could not be saved.", 503);
+        }
+        return json({ saved: true }, 201, ctx);
+      }
       if (method === "POST") {
         const answer = reporterAnswerSchema.parse(await readJson(request));
         await mutate(store, key, (ledger) =>
@@ -409,7 +483,9 @@ export async function handleApi(
             reproductionConfirmed:
               latest.reports[report.id].reproductionConfirmed,
             releaseConfirmed: latest.reports[report.id].releaseConfirmed,
+            telegramLinked: Boolean(latest.reports[report.id].telegram),
           },
+          telegramAvailable: key === "live" && telegramConfigured(),
           events: latest.events
             .filter((e) => e.clusterId === report.clusterId)
             .map((e) => ({
@@ -467,6 +543,20 @@ export async function handleApi(
         200,
         ctx,
       );
+    if (parts[0] === "reports" && parts[2] === "screenshots" && parts[3]) {
+      if (method !== "GET") throw new DomainError("Use GET.", 405);
+      owner(ctx);
+      const shot = (await store.read("live")).ledger.reports[parts[1]]
+        ?.screenshots?.[Number(parts[3])];
+      if (!shot) throw new DomainError("Screenshot not found.", 404);
+      return new Response(Buffer.from(await getScreenshot(shot)), {
+        headers: {
+          "Content-Type": shot.type,
+          "Cache-Control": "private, no-store",
+          "Content-Security-Policy": "default-src 'none'; sandbox",
+        },
+      });
+    }
     if (parts[0] === "reports" && method === "POST") {
       const body = reportSchema.parse(await readJson(request));
       const token = randomBytes(32).toString("base64url");

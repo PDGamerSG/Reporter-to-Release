@@ -43,6 +43,8 @@ Select **Open live workspace** and enter the configured owner access key. The st
 | Connections          | Read database, concierge and engineering heartbeats, GitHub relay, triage and deferred chat status.                                                      |
 | Workflow guide       | Review the required evidence and human/reporter gates.                                                                                                   |
 
+Reporters can choose **Connect Telegram** on their tracking page to get a message when their bug changes. Send `/status` to the bot for the current state, or `/stop` to end updates. When screenshots are enabled, the home page offers **Add a screenshot**. Screenshots are not redacted, are visible only to the live owner, and expire after 30 days.
+
 Record reproduction and fix evidence in the dossier dialog. The ledger requires the original reporter's confirmation before fixing and human review before a signed merge can advance it. A successful signed production deployment containing that merge unlocks release verification. Owner buttons cannot impersonate the live GitHub merge/deployment relay.
 
 Use **Refresh workspace** to load current activity and connection status. Engineering is connected only when all four role connections are open and its heartbeat is less than 90 seconds old. A connected service can still reach its model budget or fail an inference; inspect the bug's activity for the actual outcome.

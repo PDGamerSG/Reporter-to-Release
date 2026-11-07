@@ -38,6 +38,15 @@ class Worker:
             headers={"Authorization": "Bearer " + os.environ["SWITCH_API_KEY"]},
             timeout=30,
         )
+        telegram_token = os.environ.get("TELEGRAM_BOT_TOKEN")
+        self.telegram = (
+            httpx.AsyncClient(
+                base_url=f"https://api.telegram.org/bot{telegram_token}/",
+                timeout=15,
+            )
+            if telegram_token
+            else None
+        )
         self.allowed = {
             s.strip()
             for s in os.environ.get("SWITCH_ENGINEERING_AGENT_IDS", "").split(",")
@@ -156,6 +165,16 @@ class Worker:
         )
         response.raise_for_status()
 
+    async def send_telegram(self, chat_id: int, text: str):
+        if not self.telegram:
+            raise ValueError("Telegram is not configured")
+        response = await self.telegram.post(
+            "sendMessage", json={"chat_id": chat_id, "text": text}
+        )
+        # A reporter who blocked the bot will never receive a retry.
+        if response.status_code != 403:
+            response.raise_for_status()
+
     async def deliver(self, job: dict, public, engineering):
         if self.db.execute(
             "SELECT 1 FROM deliveries WHERE id=?", (job["id"],)
@@ -195,6 +214,8 @@ class Worker:
                 job["body"] + suffix,
                 target_names=[os.environ.get("SWITCH_MANAGER_NAME", "vulcan-manager")],
             )
+        elif job.get("telegramChatId"):
+            await self.send_telegram(job["telegramChatId"], job["body"])
         elif job.get("source") == "web":
             # Web tracking reads the persisted release directly; no external message.
             pass

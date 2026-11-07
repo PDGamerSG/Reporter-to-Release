@@ -1160,6 +1160,37 @@ export function Dashboard() {
                     <p>Test idea: {current.triage.regressionTest}</p>
                   </section>
                 )}
+                {data?.mode === "live" &&
+                  data.reports.some(
+                    (r) => r.clusterId === current.id && r.screenshots > 0,
+                  ) && (
+                    <section className="steps-block">
+                      <h3>Reporter screenshots</h3>
+                      <p>Not redacted. Do not share these outside the desk.</p>
+                      <div className="screenshot-row">
+                        {data.reports
+                          .filter((r) => r.clusterId === current.id)
+                          .flatMap((r) =>
+                            Array.from({ length: r.screenshots }, (_, i) => (
+                              <a
+                                key={`${r.id}-${i}`}
+                                href={`/api/reports/${r.id}/screenshots/${i}`}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {/* Owner-only bytes cannot use the image optimizer. */}
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={`/api/reports/${r.id}/screenshots/${i}`}
+                                  alt={`Screenshot ${i + 1} from ${r.alias}`}
+                                  loading="lazy"
+                                />
+                              </a>
+                            )),
+                          )}
+                      </div>
+                    </section>
+                  )}
                 <section className="steps-block">
                   <h3>Steps to reproduce</h3>
                   <ol>

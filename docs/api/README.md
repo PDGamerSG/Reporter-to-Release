@@ -21,10 +21,14 @@ Browser writes require `Content-Type: application/json` and an `Origin` matching
 | `POST /api/bugs/:bugId/demo-step` | Demo session, same origin          | Advances one explicitly simulated lifecycle step. Forbidden in live mode.                                                                                              |
 | `GET /api/export`                 | Workspace session                  | Downloads the current authorized workspace as JSON.                                                                                                                    |
 
-| Endpoint                           | Caller                                 | Behavior                                                                                                                                             |
-| ---------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `POST /api/track/:reportId/triage` | Report capability (`x-reporter-token`) | Returns advisory AI triage. Once a bug has triage, calls return the stored result with `reused: true` at no cost. Add `?mode=demo` for demo reports. |
-| `GET /api/ai/usage`                | Live owner                             | Returns recorded model spend, the cap, and token totals, including cached tokens.                                                                    |
+| Endpoint                                        | Caller                                 | Behavior                                                                                                                                             |
+| ----------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /api/track/:reportId/triage`              | Report capability (`x-reporter-token`) | Returns advisory AI triage. Once a bug has triage, calls return the stored result with `reused: true` at no cost. Add `?mode=demo` for demo reports. |
+| `GET /api/ai/usage`                             | Live owner                             | Returns recorded model spend, the cap, and token totals, including cached tokens.                                                                    |
+| `POST /api/track/:reportId/telegram`            | Report capability, same origin         | Returns a one-time `t.me` link that expires in 15 minutes.                                                                                           |
+| `POST /api/track/:reportId/screenshot`          | Report capability, same origin         | Stores one PNG, JPEG or WebP image body up to 4 MB. 415 for other bytes, 409 after three.                                                            |
+| `GET /api/reports/:reportId/screenshots/:index` | Live owner                             | Returns a stored screenshot.                                                                                                                         |
+| `POST /api/telegram/webhook`                    | Telegram secret header                 | Handles `/start`, `/status` and `/stop` in private chats.                                                                                            |
 
 Triage returns 409 for a quarantined report, 429 at an hourly limit, and 503 when the model is unavailable, unconfigured, or the spending cap is reached. In each case the report stays saved. Billing figures never reach the reporter.
 

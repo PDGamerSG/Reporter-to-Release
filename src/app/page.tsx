@@ -1,4 +1,5 @@
 import { BugDesk } from "@/components/bug-desk";
+import { screenshotsConfigured } from "@/lib/integrations/screenshots";
 export default async function Home({
   searchParams,
 }: {
@@ -10,5 +11,11 @@ export default async function Home({
 }) {
   const { title, description, mode } = await searchParams;
   const text = [title, description].filter(Boolean).join(". ").slice(0, 6000);
-  return <BugDesk demo={mode === "demo"} initialText={text} />;
+  return (
+    <BugDesk
+      demo={mode === "demo"}
+      initialText={text}
+      screenshots={screenshotsConfigured()}
+    />
+  );
 }

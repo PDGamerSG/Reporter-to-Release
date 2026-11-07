@@ -21,6 +21,10 @@ export function claimJobs(ledger: Ledger, limit = 10) {
         ...j,
         route: j.reportId ? ledger.reports[j.reportId]?.route : undefined,
         source: j.reportId ? ledger.reports[j.reportId]?.source : undefined,
+        telegramChatId:
+          j.channel === "reporter" && j.reportId
+            ? ledger.reports[j.reportId]?.telegram?.chatId
+            : undefined,
       };
     });
 }

@@ -16,7 +16,7 @@ Live link: [reporter-to-release.pallabdas.me](https://reporter-to-release.pallab
 
 Reporter-to-Release gives people a way to report a bug and stay involved until its fix works for them. The desk groups duplicate reports, records a failing reproduction, asks the reporter to confirm it, and requires human review before a production release can close the loop. If a reporter still sees the failure, the bug reopens.
 
-This repository contains the web app, guarded workflow API, durable ledger, Switch concierge, isolated AWS engineering service, production recorder, tests, and documentation. Web intake, AI triage, model-generated ShopLite regressions and draft fixes are live. Telegram and Slack are deferred. The home page lets a person describe a bug and read advisory triage beside it; `/desk` opens the operator workspace with a labeled isolated demo.
+This repository contains the web app, guarded workflow API, durable ledger, Switch concierge, isolated AWS engineering service, production recorder, tests, and documentation. Web intake, AI triage, model-generated ShopLite regressions and draft fixes are live. Slack is deferred. The home page lets a person describe a bug and read advisory triage beside it; `/desk` opens the operator workspace with a labeled isolated demo.
 
 The one-page frontend is integrated into `main`. The live workspace reads the AWS engineering service's actual provider and room connections. Stale or partial connections cannot appear healthy, and the demo keeps its model roles illustrative. [Combined release evidence](docs/evidence/2026-11-07-combined-release.json) records the original frontend merge, checks and deployment; [completion evidence](docs/evidence/2026-11-07-controlled-release.json) also notes a later published-history rewrite with an unchanged source tree.
 
@@ -192,10 +192,10 @@ Configure production secrets, initialize the ledger with `npm run db:init`, depl
 ## Known limits
 
 - Autonomous engineering is restricted to normal ShopLite calculation code and a per-bug regression. Other reports receive an honest human-investigation note. The active AWS service uses one Meta provider; the optional Bedrock adapter was blocked by account quota for real-work requests.
-- Telegram and Slack are deferred. Web reporters read updates on their private tracking page; email and push notifications are not implemented.
+- A reporter can link a private tracker to the Telegram bot for updates, but cannot file a report through it. Slack, email and push notifications are not implemented.
 - AI triage is advisory. It never changes severity or workflow state, and it reads only the sanitized dossier, so it cannot see redacted details or the codebase. Its likely cause is an unverified hypothesis.
 - The app's spending cap counts this app's calls only. It cannot read the provider's credit balance, so check that in the Model API dashboard.
-- Redaction and instruction detection are heuristic. Voice reports and screenshot uploads are not supported by the web form.
+- Redaction and instruction detection are heuristic. Voice reports are not supported. Screenshots are stored privately and are not redacted, so they stay out of the model, Switch and GitHub.
 - The AWS service executes and measures its tests in isolated containers. The ledger still trusts authorized evidence submissions; it does not independently attest every command or derive changed paths from GitHub. Human review remains required.
 - Owner access uses a shared key. Sensitive approval gates require verified GitHub identities; a second authorized human must be configured for those fixes.
 - Live controlled acceptance proves model-generated reproduction and fix, reporter gating, explicit owner approval, merge, verified production recording and original-reporter confirmation. Its overflow check executes the calculation module from the verified production revision; the web checkout uses a fixed price. Reopening is proven in isolated tests and the labeled demo. No released customer resolution is claimed.

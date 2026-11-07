@@ -17,7 +17,7 @@ flowchart LR
   runtimes --> app
   runtimes --> sandbox["Generated-code execution<br/>networkless Docker sandbox"]
   runtimes --> github
-  chat["Telegram and Slack<br/>deferred"] -.-> switch
+  chat["Slack<br/>deferred"] -.-> switch
 ```
 
 Sources: [API](../src/lib/api.ts), [worker](../worker/src/r2r_worker/main.py), [engineering runtime](../worker/src/r2r_engineering/runtime.py), [GitHub relay](../src/lib/integrations/github.ts), [engineering compose](../infra/engineering.compose.yml). Telegram and Slack remain deferred. The active engineering service runs model stages through four Switch identities; model review is advisory.
