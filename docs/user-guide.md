@@ -14,7 +14,7 @@ Sources: [page](../src/components/bug-desk.tsx), [tracker](../src/components/tra
 
 ## Explore the demo
 
-The [bug desk](https://reporter-to-release.pallabdas.me/desk) opens an isolated, seeded demo for each visitor. The purple demo notice identifies synthetic reports, agents, and releases. Searches, filters, dossier dialogs, reset, and example lifecycle buttons operate within that private workspace.
+The [bug desk](https://reporter-to-release.pallabdas.me/desk) opens an isolated, seeded demo for each visitor. The demo notice identifies synthetic reports, agents, and releases. Searches, filters, dossier dialogs, reset, and example lifecycle buttons operate within that private workspace.
 
 1. Open a bug from the inbox and inspect its dossier, evidence, activity, and reporters.
 2. Submit a new report from the demo or use `/?mode=demo`.

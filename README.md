@@ -64,7 +64,7 @@ The API checks authority and lifecycle prerequisites on every write. The concier
 
 ## Screenshots
 
-Captured on November 7, 2026 from the local production build of combined release `4476dfc`, in Chromium at 1440 × 900, light theme, with reduced motion. Dashboard and dossier images show the labeled demo. The one-page report form has a sample selected without submitting it. ShopLite is the seeded test app. The production hostname and exact immutable release were checked separately in the linked release evidence.
+Captured on November 7, 2026 from the local production build of combined release `4476dfc`, in Chromium at 1440 × 900, light theme, with reduced motion. Dashboard and dossier images were retaken after the desk redesign and show the labeled demo. The one-page report form has a sample selected without submitting it. ShopLite is the seeded test app. The production hostname and exact immutable release were checked separately in the linked release evidence.
 
 <p align="center">
   <img src="docs/images/evidence.png" width="860"

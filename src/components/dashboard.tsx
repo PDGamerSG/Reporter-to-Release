@@ -9,22 +9,16 @@ import {
 import Link from "next/link";
 import {
   Activity,
-  ArrowDownToLine,
   ArrowRight,
   ArrowUpRight,
-  Bell,
-  BookOpen,
   Check,
   CheckCircle2,
-  ChevronDown,
   ChevronRight,
   Cpu,
   ExternalLink,
   FlaskConical,
   GitBranch,
   GitPullRequest,
-  Inbox,
-  LayoutDashboard,
   LoaderCircle,
   LockKeyhole,
   Menu,
@@ -44,6 +38,7 @@ import {
 import type { Command as WorkflowCommand, State } from "@/lib/domain/types";
 import type { Workspace } from "@/lib/presentation";
 import { ReportForm } from "./report-form";
+import { Roly, SketchDefs } from "./roly";
 import {
   Empty,
   External,
@@ -65,13 +60,13 @@ type View =
   | "connections"
   | "guide";
 const navigation = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "inbox", label: "Bug inbox", icon: Inbox },
-  { id: "activity", label: "Activity", icon: Activity },
-  { id: "releases", label: "Releases", icon: Rocket },
-  { id: "crew", label: "Agent crew", icon: Users },
-  { id: "airlock", label: "Airlock", icon: ShieldCheck },
-  { id: "connections", label: "Connections", icon: Workflow },
+  { id: "overview", label: "Overview" },
+  { id: "inbox", label: "Bug inbox" },
+  { id: "activity", label: "Activity" },
+  { id: "releases", label: "Releases" },
+  { id: "crew", label: "Agent crew" },
+  { id: "airlock", label: "Airlock" },
+  { id: "connections", label: "Connections" },
 ] as const;
 const crew = [
   {
@@ -276,11 +271,45 @@ export function Dashboard() {
     setFilter("all");
     setSearch("");
     setMobileOpen(false);
+    window.scrollTo(0, 0);
   };
   const openBug = (id: string) => {
     setSelected(id);
     setDetailTab("overview");
   };
+
+  const areas = new Set(active.map((c) => c.component)).size;
+  const duplicates = Math.max(0, people - clusters.length);
+  const verified = clusters.filter((c) => c.state === "verified").length;
+  const stages = [
+    {
+      name: "Intake",
+      count: clusters.filter((c) => c.state === "new").length,
+    },
+    {
+      name: "Reproduce",
+      count: clusters.filter((c) =>
+        ["reproducing", "reopened"].includes(c.state),
+      ).length,
+    },
+    {
+      name: "Confirm",
+      count: clusters.filter((c) =>
+        ["awaiting_reporter", "confirmed"].includes(c.state),
+      ).length,
+    },
+    {
+      name: "Fix & review",
+      count: clusters.filter((c) =>
+        ["fixing", "review", "merged"].includes(c.state),
+      ).length,
+    },
+    { name: "Release", count: released.length },
+  ];
+  const busiest = stages.reduce(
+    (best, stage, i) => (stage.count > stages[best].count ? i : best),
+    0,
+  );
 
   function bugQueue() {
     return (
@@ -297,22 +326,25 @@ export function Dashboard() {
                 {view === "airlock" ? quarantined.length : clusters.length}
               </span>
             </h2>
-            <p>
-              {view === "airlock"
-                ? "Instruction-bearing text is discarded before it reaches engineering."
-                : "Real people. Reproducible bugs. A clear path forward."}
-            </p>
+            {view === "airlock" && (
+              <p>
+                Instruction-bearing text is discarded before it reaches
+                engineering.
+              </p>
+            )}
           </div>
-          <button
-            className="button subtle small"
-            onClick={() => {
-              setView("inbox");
-              setFilter("all");
-            }}
-          >
-            View all
-            <ArrowUpRight size={14} />
-          </button>
+          {view === "overview" && (
+            <button
+              className="button subtle small"
+              onClick={() => {
+                setView("inbox");
+                setFilter("all");
+              }}
+            >
+              View all
+              <ArrowUpRight size={14} />
+            </button>
+          )}
         </div>
         <div className="queue-tools">
           <div className="tabs" aria-label="Filter bugs">
@@ -397,7 +429,9 @@ export function Dashboard() {
               <span className="impact">
                 <Users size={13} />
                 {c.reportIds.length}
-                <span>reporters</span>
+                <span>
+                  {c.reportIds.length === 1 ? "reporter" : "reporters"}
+                </span>
               </span>
               <span className="updated">{ago(c.updatedAt)}</span>
               <ChevronRight size={15} className="row-chevron" />
@@ -417,10 +451,6 @@ export function Dashboard() {
           <span>
             Showing {visible.length} of{" "}
             {view === "airlock" ? quarantined.length : clusters.length} reports
-          </span>
-          <span>
-            <Shield size={12} />
-            Every fix starts with proof
           </span>
         </div>
       </section>
@@ -461,35 +491,31 @@ export function Dashboard() {
 
   return (
     <div className="app-shell">
-      <aside className={`sidebar ${mobileOpen ? "is-open" : ""}`}>
+      <SketchDefs />
+      <header className="desk-bar">
         <Link className="brand" href="/">
-          <span className="brand-mark">
-            <GitBranch size={21} />
-          </span>
-          <span>
-            Reporter<span className="brand-second">to Release</span>
-          </span>
-          <span className="brand-dot" />
+          <Roly curled className="brand-mark" />
+          <span className="brand-name">Reporter-to-Release</span>
         </Link>
-        <button className="workspace-switch" onClick={() => setLoginOpen(true)}>
-          <span className="team-avatar">V</span>
-          <span>
-            <strong>Team Vulcan</strong>
-            <small>
-              {data?.mode === "live" ? "Live workspace" : "Hackathon workspace"}
-            </small>
-          </span>
-          <ChevronDown size={14} />
+        <button
+          className="icon-button mobile-menu"
+          aria-label="Open navigation"
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen(!mobileOpen)}
+        >
+          <Menu size={20} />
         </button>
-        <div className="sidebar-label">Workspace</div>
-        <nav>
-          {navigation.map(({ id, label, icon: Icon }) => (
+        <nav
+          className={`desk-nav ${mobileOpen ? "is-open" : ""}`}
+          aria-label="Bug desk"
+        >
+          {navigation.map(({ id, label }) => (
             <button
               key={id}
               className={`nav-item ${view === id ? "active" : ""}`}
+              aria-current={view === id ? "page" : undefined}
               onClick={() => changeView(id)}
             >
-              <Icon size={18} />
               <span>{label}</span>
               {id === "inbox" && (
                 <span className="nav-count">{clusters.length || "—"}</span>
@@ -500,697 +526,481 @@ export function Dashboard() {
             </button>
           ))}
         </nav>
-        <div className="sidebar-bottom">
-          <div className="powered-card">
-            <span className="powered-symbol">
-              <Zap size={17} />
-            </span>
-            <div>
-              <strong>Built on Switch</strong>
-              <p>One crew. Every handoff.</p>
-            </div>
-            <a
-              href="https://github.com/sandbox-quantum/switch"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Switch on GitHub"
-            >
-              <ArrowUpRight size={15} />
-            </a>
-          </div>
+        <div className="topbar-actions">
+          <span className={`mode-badge ${data?.mode === "live" ? "live" : ""}`}>
+            <span />
+            {data?.mode === "live" ? "Live workspace" : "Interactive demo"}
+          </span>
           <button
-            className={`nav-item ${view === "guide" ? "active" : ""}`}
-            onClick={() => changeView("guide")}
+            className="icon-button refresh"
+            onClick={load}
+            aria-label="Refresh workspace"
           >
-            <BookOpen size={17} />
-            <span>Workflow guide</span>
+            <RefreshCw size={17} />
           </button>
-          <a className="nav-item" href="/shoplite">
-            <FlaskConical size={17} />
-            <span>ShopLite test app</span>
-            <ArrowUpRight size={13} />
-          </a>
-          <div className="sidebar-account">
-            <span className="avatar-stack">
-              <span>AA</span>
-              <span>PD</span>
-              <span>+2</span>
-            </span>
-            <div>
-              <strong>Team Vulcan</strong>
-              <small>Flip the Switch 2026</small>
-            </div>
-            <button
-              className="icon-button"
-              aria-label="Workspace access"
-              onClick={() => setLoginOpen(true)}
-            >
-              <Settings2 size={17} />
-            </button>
-          </div>
+          <button
+            className="icon-button"
+            aria-label="Workspace access"
+            onClick={() => setLoginOpen(true)}
+          >
+            <Settings2 size={17} />
+          </button>
         </div>
-      </aside>
+      </header>
       {mobileOpen && (
         <button
-          className="sidebar-backdrop"
+          className="nav-backdrop"
           aria-label="Close navigation"
           onClick={() => setMobileOpen(false)}
         />
       )}
-      <div className="main-shell">
-        <header className="topbar">
-          <div className="breadcrumb">
-            <button
-              className="icon-button mobile-menu"
-              aria-label="Open navigation"
-              onClick={() => setMobileOpen(!mobileOpen)}
-            >
-              <Menu size={20} />
-            </button>
-            <span>Workspace</span>
-            <ChevronRight size={13} />
-            <strong>
-              {navigation.find((n) => n.id === view)?.label ?? "Workflow guide"}
-            </strong>
+      <main id="main" className="workspace-main">
+        <div className="page-heading">
+          <div>
+            <h1>
+              {view === "overview"
+                ? "Bug desk"
+                : view === "inbox"
+                  ? "Every bug, in one place."
+                  : view === "activity"
+                    ? "Nothing lost between handoffs."
+                    : view === "releases"
+                      ? "Shipped is only the beginning."
+                      : view === "crew"
+                        ? "Different agents. One shared mission."
+                        : view === "airlock"
+                          ? "A safe way into engineering."
+                          : view === "connections"
+                            ? "Connect the whole journey."
+                            : "From “it’s broken” to “it works.”"}
+            </h1>
+            <p>
+              {view === "overview"
+                ? "Follow every bug from the first report to a fix the reporter confirms."
+                : view === "crew"
+                  ? "Clear responsibilities, separate permissions, and a human at the merge button."
+                  : "The evidence and the people stay connected at every step."}
+            </p>
           </div>
-          <div className="topbar-actions">
-            <span
-              className={`mode-badge ${data?.mode === "live" ? "live" : ""}`}
+          <div className="heading-actions">
+            <button
+              className="button primary"
+              onClick={() => setReportOpen(true)}
             >
-              <span />
-              {data?.mode === "live" ? "Live workspace" : "Interactive demo"}
+              <Plus size={17} />
+              New report
+            </button>
+          </div>
+        </div>
+        {data?.mode === "demo" && (
+          <div className="demo-banner">
+            <FlaskConical size={16} />
+            <span>
+              You’re exploring a private demo. Example agents, reports, and
+              releases are simulated.
             </span>
-            <button
-              className="icon-button refresh"
-              onClick={load}
-              aria-label="Refresh workspace"
-            >
-              <RefreshCw size={16} />
+            <button onClick={() => setLoginOpen(true)}>
+              Open live workspace
+              <ArrowUpRight size={13} />
             </button>
-            <button
-              className="icon-button notification-button"
-              aria-label="View recent activity"
-              onClick={() => changeView("activity")}
-            >
-              <Bell size={18} />
-              <span />
+          </div>
+        )}
+        {error && (
+          <div className="error-message workspace-error" role="alert">
+            <span>{error}</span>
+            <button className="text-link" onClick={load}>
+              Retry
             </button>
-            <span className="topbar-avatar">V</span>
           </div>
-        </header>
-        <main id="main" className="workspace-main">
-          <div className="page-heading">
-            <div>
-              <div className="date-line">
-                <span className="little-orbit" />
-                {new Date().toLocaleDateString("en", {
-                  weekday: "long",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </div>
-              <h1>
-                {view === "overview"
-                  ? "Good reports. Better resolutions."
-                  : view === "inbox"
-                    ? "Every bug, in one place."
-                    : view === "activity"
-                      ? "Nothing lost between handoffs."
-                      : view === "releases"
-                        ? "Shipped is only the beginning."
-                        : view === "crew"
-                          ? "Different agents. One shared mission."
-                          : view === "airlock"
-                            ? "A safe way into engineering."
-                            : view === "connections"
-                              ? "Connect the whole journey."
-                              : "From “it’s broken” to “it works.”"}
-              </h1>
-              <p>
-                {view === "overview"
-                  ? "Follow every bug from the first message to a fix the reporter confirms."
-                  : view === "crew"
-                    ? "Clear responsibilities, separate permissions, and a human at the merge button."
-                    : "The evidence and the people stay connected at every step."}
-              </p>
-            </div>
-            <div className="heading-actions">
-              <a className="button secondary" href="/api/export" download>
-                <ArrowDownToLine size={15} />
-                <span>Export log</span>
-              </a>
-              <button
-                className="button primary"
-                onClick={() => setReportOpen(true)}
-              >
-                <Plus size={17} />
-                New report
-              </button>
-            </div>
+        )}
+        {loading && !data ? (
+          <div className="loading-workspace">
+            <LoaderCircle className="spin" size={28} />
+            <h2>Opening your bug desk…</h2>
+            <p>Connecting reports, evidence, and release history.</p>
           </div>
-          {data?.mode === "demo" && (
-            <div className="demo-banner">
-              <FlaskConical size={16} />
-              <span>
-                You’re exploring a private demo. Example agents, reports, and
-                releases are simulated.
-              </span>
-              <button onClick={() => setLoginOpen(true)}>
-                Open live workspace
-                <ArrowUpRight size={13} />
-              </button>
-            </div>
-          )}
-          {error && (
-            <div className="error-message workspace-error" role="alert">
-              <span>{error}</span>
-              <button className="text-link" onClick={load}>
-                Retry
-              </button>
-            </div>
-          )}
-          {loading && !data ? (
-            <div className="loading-workspace">
-              <LoaderCircle className="spin" size={28} />
-              <h2>Opening your bug desk…</h2>
-              <p>Connecting reports, evidence, and release history.</p>
-            </div>
-          ) : (
-            data && (
-              <>
-                {(view === "overview" || view === "inbox") && (
-                  <>
-                    <div className="stats-grid">
-                      <div className="stat-item">
-                        <span className="stat-icon purple">
-                          <Inbox size={20} />
-                        </span>
-                        <div>
-                          <span>Active bugs</span>
-                          <strong>
-                            {active.length}
-                            <small>
-                              across{" "}
-                              {new Set(active.map((c) => c.component)).size}{" "}
-                              areas
-                            </small>
-                          </strong>
-                        </div>
-                        <span className="mini-bars">
-                          <i />
-                          <i />
-                          <i />
-                          <i />
-                          <i />
-                          <i />
-                          <i />
-                        </span>
-                      </div>
-                      <div className="stat-item">
-                        <span className="stat-icon amber">
-                          <Users size={20} />
-                        </span>
-                        <div>
-                          <span>People heard</span>
-                          <strong>
-                            {people}
-                            <small>no report left behind</small>
-                          </strong>
-                        </div>
-                        <span className="stat-annotation">
-                          {Math.max(0, people - clusters.length)}
-                          <small>duplicates linked</small>
-                        </span>
-                      </div>
-                      <div className="stat-item">
-                        <span className="stat-icon teal">
-                          <ShieldCheck size={20} />
-                        </span>
-                        <div>
-                          <span>Verified resolutions</span>
-                          <strong>
-                            {
-                              clusters.filter((c) => c.state === "verified")
-                                .length
-                            }
-                            <small>confirmed by the reporter</small>
-                          </strong>
-                        </div>
-                        <span className="stat-check">
-                          <Check size={18} />
-                        </span>
-                      </div>
-                    </div>
-                    {view === "overview" && (
-                      <section className="pipeline-strip">
-                        <div className="pipeline-intro">
-                          <span className="pipeline-icon">
-                            <Workflow size={20} />
+        ) : (
+          data && (
+            <>
+              {(view === "overview" || view === "inbox") && (
+                <>
+                  {view === "overview" && (
+                    <>
+                      <div className="desk-summary">
+                        <div className="summary-item">
+                          <strong>{active.length}</strong>
+                          <span>
+                            {active.length === 1 ? "active bug" : "active bugs"}{" "}
+                            across {areas} {areas === 1 ? "area" : "areas"}
                           </span>
-                          <div>
-                            <strong>The resolution loop</strong>
-                            <small>
-                              Proof before patches. People before closure.
-                            </small>
-                          </div>
                         </div>
-                        <div className="pipeline-track">
-                          {[
-                            {
-                              name: "Intake",
-                              count: clusters.filter((c) => c.state === "new")
-                                .length,
-                              color: "blue",
-                            },
-                            {
-                              name: "Reproduce",
-                              count: clusters.filter((c) =>
-                                ["reproducing", "reopened"].includes(c.state),
-                              ).length,
-                              color: "amber",
-                            },
-                            {
-                              name: "Confirm",
-                              count: clusters.filter((c) =>
-                                ["awaiting_reporter", "confirmed"].includes(
-                                  c.state,
-                                ),
-                              ).length,
-                              color: "purple",
-                            },
-                            {
-                              name: "Fix & review",
-                              count: clusters.filter((c) =>
-                                ["fixing", "review", "merged"].includes(
-                                  c.state,
-                                ),
-                              ).length,
-                              color: "pink",
-                            },
-                            {
-                              name: "Release",
-                              count: released.length,
-                              color: "teal",
-                            },
-                          ].map((stage, i) => (
-                            <div className="pipeline-stage" key={stage.name}>
-                              <span
-                                className={`pipeline-stage-number ${stage.color}`}
-                              >
-                                {stage.count}
-                              </span>
-                              <span>{stage.name}</span>
-                              {i < 4 && <ChevronRight size={13} />}
-                            </div>
-                          ))}
+                        <div className="summary-item">
+                          <strong>{people}</strong>
+                          <span>
+                            {people === 1 ? "person" : "people"} heard,{" "}
+                            {duplicates}{" "}
+                            {duplicates === 1 ? "duplicate" : "duplicates"}{" "}
+                            linked
+                          </span>
                         </div>
-                      </section>
-                    )}
-                    <div
-                      className={`content-grid ${view === "inbox" ? "full-width" : ""}`}
-                    >
-                      <div>
-                        {bugQueue()}
-                        {view === "overview" && (
-                          <div className="loop-callout">
-                            <span className="callout-icon">
-                              <MessageCircle size={22} />
-                            </span>
-                            <div>
-                              <strong>A merge isn’t the finish line.</strong>
-                              <p>
-                                When the fix goes live, every reporter gets an
-                                update. If it still fails, the bug reopens.
-                              </p>
-                            </div>
-                            <button
-                              className="text-link"
-                              onClick={() => changeView("guide")}
-                            >
-                              See the workflow
-                              <ArrowRight size={14} />
-                            </button>
-                          </div>
-                        )}
+                        <div className="summary-item">
+                          <strong>{verified}</strong>
+                          <span>
+                            {verified === 1 ? "fix" : "fixes"} confirmed by
+                            reporters
+                          </span>
+                        </div>
                       </div>
-                      {view === "overview" && (
-                        <aside className="context-rail">
-                          <section className="rail-card">
-                            <div className="rail-heading">
-                              <h2>
-                                <Activity size={16} />
-                                Latest activity
-                              </h2>
-                              <button
-                                className="icon-button"
-                                aria-label="View all activity"
-                                onClick={() => changeView("activity")}
-                              >
-                                <ArrowUpRight size={15} />
-                              </button>
-                            </div>
-                            {activityFeed(5)}
+                      <ol className="pipeline-track" aria-label="Bugs by step">
+                        {stages.map((stage, i) => (
+                          <li
+                            className={`pipeline-stage ${stage.count ? "" : "is-empty"}`}
+                            key={stage.name}
+                          >
+                            {i === busiest && stage.count > 0 && (
+                              <Roly curled={false} className="pipeline-roly" />
+                            )}
+                            <strong>{stage.count}</strong>
+                            <span>{stage.name}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </>
+                  )}
+                  <div
+                    className={`content-grid ${view === "inbox" ? "full-width" : ""}`}
+                  >
+                    <div>{bugQueue()}</div>
+                    {view === "overview" && (
+                      <aside className="context-rail">
+                        <section className="rail-card">
+                          <div className="rail-heading">
+                            <h2>
+                              <Activity size={16} />
+                              Latest activity
+                            </h2>
                             <button
-                              className="rail-footer-button"
+                              className="icon-button"
+                              aria-label="View all activity"
                               onClick={() => changeView("activity")}
                             >
-                              Open activity log
-                              <ArrowRight size={13} />
+                              <ArrowUpRight size={15} />
                             </button>
-                          </section>
-                          <section className="rail-card crew-preview">
-                            <div className="rail-heading">
-                              <h2>
-                                <Users size={16} />
-                                The crew
-                              </h2>
-                              <span className="small-muted">5 roles</span>
-                            </div>
-                            {crew.slice(0, 4).map((a) => (
-                              <div className="crew-mini" key={a.name}>
-                                <span className={`agent-avatar ${a.color}`}>
-                                  {a.initials}
-                                </span>
-                                <div>
-                                  <strong>{a.name}</strong>
-                                  <small>{a.vendor.split(" / ")[0]}</small>
-                                </div>
-                                <span className="role-indicator" />
-                              </div>
-                            ))}
-                            <button
-                              className="rail-footer-button"
-                              onClick={() => changeView("crew")}
-                            >
-                              Meet the whole crew
-                              <ArrowRight size={13} />
-                            </button>
-                          </section>
-                        </aside>
-                      )}
-                    </div>
-                  </>
-                )}
-                {view === "activity" && (
-                  <section className="panel activity-panel">
-                    <div className="section-heading">
-                      <div>
-                        <h2>The complete evidence trail</h2>
-                        <p>Each transition records who did what and why.</p>
-                      </div>
-                      <span className="count-pill">
-                        {eventList.length} events
-                      </span>
-                    </div>
-                    {activityFeed(200)}
-                  </section>
-                )}
-                {view === "releases" && (
-                  <div className="release-grid">
-                    {released.map((c) => (
-                      <section className="release-card" key={c.id}>
-                        <div className="release-card-top">
-                          <span className="stat-icon teal">
-                            <Rocket size={22} />
-                          </span>
-                          <StateBadge state={c.state} />
-                        </div>
-                        <span className="small-muted">
-                          {c.id} · {c.release?.version}
-                        </span>
-                        <h2>{c.title}</h2>
-                        <p>
-                          {c.reportIds.length} affected reporters.{" "}
-                          {
-                            data.reports.filter(
-                              (r) => r.clusterId === c.id && r.releaseConfirmed,
-                            ).length
-                          }{" "}
-                          confirmed the live fix.
-                        </p>
-                        <div className="release-footer">
-                          <span>
-                            <CheckCircle2 size={14} />
-                            {c.release ? niceDate(c.release.deployedAt) : ""}
-                          </span>
+                          </div>
+                          {activityFeed(5)}
                           <button
-                            className="text-link"
-                            onClick={() => openBug(c.id)}
+                            className="rail-footer-button"
+                            onClick={() => changeView("activity")}
                           >
-                            View evidence
-                            <ArrowUpRight size={13} />
+                            Open activity log
+                            <ArrowRight size={13} />
                           </button>
+                        </section>
+                      </aside>
+                    )}
+                  </div>
+                </>
+              )}
+              {view === "activity" && (
+                <section className="panel activity-panel">
+                  <div className="section-heading">
+                    <div>
+                      <h2>The complete evidence trail</h2>
+                      <p>Each transition records who did what and why.</p>
+                    </div>
+                    <span className="count-pill">
+                      {eventList.length} events
+                    </span>
+                  </div>
+                  {activityFeed(200)}
+                </section>
+              )}
+              {view === "releases" && (
+                <div className="release-grid">
+                  {released.map((c) => (
+                    <section className="release-card" key={c.id}>
+                      <div className="release-card-top">
+                        <span className="stat-icon teal">
+                          <Rocket size={22} />
+                        </span>
+                        <StateBadge state={c.state} />
+                      </div>
+                      <span className="small-muted">
+                        {c.id} · {c.release?.version}
+                      </span>
+                      <h2>{c.title}</h2>
+                      <p>
+                        {c.reportIds.length} affected{" "}
+                        {c.reportIds.length === 1 ? "reporter" : "reporters"}.{" "}
+                        {
+                          data.reports.filter(
+                            (r) => r.clusterId === c.id && r.releaseConfirmed,
+                          ).length
+                        }{" "}
+                        confirmed the live fix.
+                      </p>
+                      <div className="release-footer">
+                        <span>
+                          <CheckCircle2 size={14} />
+                          {c.release ? niceDate(c.release.deployedAt) : ""}
+                        </span>
+                        <button
+                          className="text-link"
+                          onClick={() => openBug(c.id)}
+                        >
+                          View evidence
+                          <ArrowUpRight size={13} />
+                        </button>
+                      </div>
+                    </section>
+                  ))}
+                  {!released.length && (
+                    <Empty title="No releases yet">
+                      A verified production deployment will appear here after a
+                      human merges the reviewed fix.
+                    </Empty>
+                  )}
+                </div>
+              )}
+              {view === "crew" && (
+                <>
+                  <div className="info-banner">
+                    <LockKeyhole size={18} />
+                    <span>
+                      These are the workflow’s configured roles.{" "}
+                      {data.mode === "demo"
+                        ? "Example activity is simulated."
+                        : data.engineering?.fresh
+                          ? `${data.engineering.roomsConnected} of 4 engineering role connections. Model outcomes are recorded in each bug’s activity.`
+                          : "Waiting for a fresh engineering heartbeat from AWS. Model outcomes are recorded in each bug’s activity."}
+                    </span>
+                  </div>
+                  <div className="crew-grid">
+                    {crew.map((a) => (
+                      <section className="agent-card" key={a.name}>
+                        <div>
+                          <span className={`agent-avatar large ${a.color}`}>
+                            {a.initials}
+                          </span>
+                          <span className="role-badge">
+                            {a.name === "Concierge"
+                              ? "Public-facing"
+                              : "Private engineering"}
+                          </span>
+                        </div>
+                        <h2>{a.name}</h2>
+                        <span className="vendor-label">
+                          {a.name === "Concierge" || a.name === "Bug manager"
+                            ? a.vendor
+                            : engineeringVendor}
+                        </span>
+                        <p>{a.role}</p>
+                        <div className="agent-access">
+                          <Shield size={14} />
+                          {a.access}
                         </div>
                       </section>
                     ))}
-                    {!released.length && (
-                      <Empty title="No releases yet">
-                        A verified production deployment will appear here after
-                        a human merges the reviewed fix.
-                      </Empty>
-                    )}
                   </div>
-                )}
-                {view === "crew" && (
-                  <>
-                    <div className="info-banner">
-                      <LockKeyhole size={18} />
-                      <span>
-                        These are the workflow’s configured roles.{" "}
-                        {data.mode === "demo"
-                          ? "Example activity is simulated."
-                          : data.engineering?.fresh
-                            ? `${data.engineering.roomsConnected} of 4 engineering role connections. Model outcomes are recorded in each bug’s activity.`
-                            : "Waiting for a fresh engineering heartbeat from AWS. Model outcomes are recorded in each bug’s activity."}
-                      </span>
+                  <div className="human-gate">
+                    <span className="human-icon">
+                      <Users size={24} />
+                    </span>
+                    <div>
+                      <h3>The most important role is still human.</h3>
+                      <p>
+                        Owners approve the evidence and merge the pull request.
+                        Sensitive changes need two humans, including a code
+                        owner.
+                      </p>
                     </div>
-                    <div className="crew-grid">
-                      {crew.map((a) => (
-                        <section className="agent-card" key={a.name}>
-                          <div>
-                            <span className={`agent-avatar large ${a.color}`}>
-                              {a.initials}
-                            </span>
-                            <span className="role-badge">
-                              {a.name === "Concierge"
-                                ? "Public-facing"
-                                : "Private engineering"}
-                            </span>
-                          </div>
-                          <h2>{a.name}</h2>
-                          <span className="vendor-label">
-                            {a.name === "Concierge" || a.name === "Bug manager"
-                              ? a.vendor
-                              : engineeringVendor}
+                  </div>
+                </>
+              )}
+              {view === "airlock" && (
+                <>
+                  <div className="airlock-explainer">
+                    <span className="airlock-shield">
+                      <ShieldCheck size={34} />
+                    </span>
+                    <div>
+                      <h2>Bug facts cross the boundary. Instructions don’t.</h2>
+                      <p>
+                        Incoming reports are normalized, stripped of links and
+                        mentions, checked for instruction signals, and redacted.
+                        Suspicious text is discarded. An owner must supply clean
+                        replacement facts.
+                      </p>
+                    </div>
+                    <span className="airlock-counter">
+                      <strong>{quarantined.length}</strong>held for review
+                    </span>
+                  </div>
+                  {bugQueue()}
+                </>
+              )}
+              {view === "connections" && (
+                <>
+                  <div className="connection-grid">
+                    {data.integrations.map((i) => (
+                      <section className="connection-card" key={i.id}>
+                        <div className="connection-card-top">
+                          <span className={`connection-logo ${i.id}`}>
+                            {i.id === "database" ? (
+                              <GitBranch />
+                            ) : i.id === "switch" ? (
+                              <Zap />
+                            ) : i.id === "github" ? (
+                              <GitPullRequest />
+                            ) : i.id === "engineering" || i.id === "model" ? (
+                              <Cpu />
+                            ) : (
+                              <MessageCircle />
+                            )}
                           </span>
-                          <p>{a.role}</p>
-                          <div className="agent-access">
-                            <Shield size={14} />
-                            {a.access}
-                          </div>
-                        </section>
-                      ))}
-                    </div>
-                    <div className="human-gate">
-                      <span className="human-icon">
-                        <Users size={24} />
-                      </span>
-                      <div>
-                        <h3>The most important role is still human.</h3>
-                        <p>
-                          Owners approve the evidence and merge the pull
-                          request. Sensitive changes need two humans, including
-                          a code owner.
-                        </p>
-                      </div>
-                    </div>
-                  </>
-                )}
-                {view === "airlock" && (
-                  <>
-                    <div className="airlock-explainer">
-                      <span className="airlock-shield">
-                        <ShieldCheck size={34} />
-                      </span>
-                      <div>
-                        <h2>
-                          Bug facts cross the boundary. Instructions don’t.
-                        </h2>
-                        <p>
-                          Incoming reports are normalized, stripped of links and
-                          mentions, checked for instruction signals, and
-                          redacted. Suspicious text is discarded. An owner must
-                          supply clean replacement facts.
-                        </p>
-                      </div>
-                      <span className="airlock-counter">
-                        <strong>{quarantined.length}</strong>held for review
-                      </span>
-                    </div>
-                    {bugQueue()}
-                  </>
-                )}
-                {view === "connections" && (
-                  <>
-                    <div className="connection-grid">
-                      {data.integrations.map((i) => (
-                        <section className="connection-card" key={i.id}>
-                          <div className="connection-card-top">
-                            <span className={`connection-logo ${i.id}`}>
-                              {i.id === "database" ? (
-                                <GitBranch />
-                              ) : i.id === "switch" ? (
-                                <Zap />
-                              ) : i.id === "github" ? (
-                                <GitPullRequest />
-                              ) : i.id === "engineering" || i.id === "model" ? (
-                                <Cpu />
-                              ) : (
-                                <MessageCircle />
-                              )}
-                            </span>
-                            <span className={`connection-status ${i.status}`}>
-                              <span />
-                              {i.status}
-                            </span>
-                          </div>
-                          <h2>{i.name}</h2>
-                          <p>{i.detail}</p>
-                          <div className="connection-next">
-                            {i.id === "database"
-                              ? "Reports persist across deployments."
-                              : i.id === "switch"
-                                ? "AWS hosts the persistent room worker."
-                                : i.id === "github"
-                                  ? "Only signed events from the connected repository are accepted."
-                                  : i.id === "engineering"
-                                    ? "AWS coordinates measured regressions and draft fixes."
-                                    : i.id === "model"
-                                      ? "Advisory triage uses a server-side spending cap."
-                                      : "Chat is optional; web reports are available now."}
-                          </div>
-                        </section>
-                      ))}
-                    </div>
-                    <section className="panel setup-panel">
-                      <h2>One flow, connected deliberately.</h2>
-                      <p>
-                        The live connection status reflects configuration and
-                        worker heartbeats. The demo is isolated from these
-                        services.
-                      </p>
-                      <ol>
-                        <li>Send a web report from the home page.</li>
-                        <li>
-                          Confirm the AWS reproducer’s failing test using your
-                          private tracking link.
-                        </li>
-                        <li>
-                          Review the tested draft fix. A human owner approves
-                          and merges it.
-                        </li>
-                        <li>
-                          After the verified production deployment, check the
-                          fix and confirm it or reopen the report.
-                        </li>
-                      </ol>
-                      <External href="https://github.com/PDGamerSG/Reporter-to-Release#quick-start">
-                        Setup and source
-                      </External>
-                    </section>
-                  </>
-                )}
-                {view === "guide" && (
-                  <section className="workflow-guide panel">
-                    <div className="guide-intro">
-                      <span className="stat-icon purple">
-                        <Workflow size={24} />
-                      </span>
-                      <h2>Close the loop, not just the ticket.</h2>
-                      <p>
-                        A report is a conversation with someone who needs their
-                        problem solved. Here’s how the desk keeps that person
-                        connected.
-                      </p>
-                    </div>
-                    {[
-                      {
-                        title: "A person reports what broke",
-                        description:
-                          "They use the public bug desk or the web form. The concierge keeps the steps and observed behavior; common personal details are redacted.",
-                        icon: MessageCircle,
-                      },
-                      {
-                        title: "The bug earns its evidence",
-                        description:
-                          "The reproducer writes and runs a failing regression. The original reporter gets the reproduction and confirms it using a private link or native card.",
-                        icon: FlaskConical,
-                      },
-                      {
-                        title: "A separate agent writes the fix",
-                        description:
-                          "The fixer receives the confirmed test and sanitized dossier. A reviewer checks the patch. A human owner approves and merges it.",
-                        icon: GitPullRequest,
-                      },
-                      {
-                        title: "Production makes it real",
-                        description:
-                          "The signed GitHub relay verifies that the production commit contains the merge. A merge alone never sends a release notice.",
-                        icon: Rocket,
-                      },
-                      {
-                        title: "Every reporter gets the last word",
-                        description:
-                          "Everyone in the cluster gets a notification. The reporter confirms the fix. If it still fails, the bug reopens and a new reproduction is required.",
-                        icon: ShieldCheck,
-                      },
-                    ].map((s, i) => (
-                      <div className="guide-step" key={s.title}>
-                        <span className="guide-step-number">{i + 1}</span>
-                        <div>
-                          <h3>
-                            <s.icon size={18} />
-                            {s.title}
-                          </h3>
-                          <p>{s.description}</p>
+                          <span className={`connection-status ${i.status}`}>
+                            <span />
+                            {i.status}
+                          </span>
                         </div>
-                      </div>
+                        <h2>{i.name}</h2>
+                        <p>{i.detail}</p>
+                        <div className="connection-next">
+                          {i.id === "database"
+                            ? "Reports persist across deployments."
+                            : i.id === "switch"
+                              ? "AWS hosts the persistent room worker."
+                              : i.id === "github"
+                                ? "Only signed events from the connected repository are accepted."
+                                : i.id === "engineering"
+                                  ? "AWS coordinates measured regressions and draft fixes."
+                                  : i.id === "model"
+                                    ? "Advisory triage uses a server-side spending cap."
+                                    : "Chat is optional; web reports are available now."}
+                        </div>
+                      </section>
                     ))}
-                    <div className="guide-actions">
-                      <Link className="button primary" href="/">
-                        Report a real bug
-                        <ArrowUpRight size={15} />
-                      </Link>
-                      <Link className="button secondary" href="/shoplite">
-                        Try the seeded bug
-                        <FlaskConical size={15} />
-                      </Link>
-                    </div>
+                  </div>
+                  <section className="panel setup-panel">
+                    <h2>One flow, connected deliberately.</h2>
+                    <p>
+                      The live connection status reflects configuration and
+                      worker heartbeats. The demo is isolated from these
+                      services.
+                    </p>
+                    <ol>
+                      <li>Send a web report from the home page.</li>
+                      <li>
+                        Confirm the AWS reproducer’s failing test using your
+                        private tracking link.
+                      </li>
+                      <li>
+                        Review the tested draft fix. A human owner approves and
+                        merges it.
+                      </li>
+                      <li>
+                        After the verified production deployment, check the fix
+                        and confirm it or reopen the report.
+                      </li>
+                    </ol>
+                    <External href="https://github.com/PDGamerSG/Reporter-to-Release#quick-start">
+                      Setup and source
+                    </External>
                   </section>
-                )}
-              </>
-            )
-          )}
-          <footer className="app-footer">
-            <span>
-              <span className="footer-dot" />
-              Reporter-to-Release <span className="footer-slash">/</span> Team
-              Vulcan
-            </span>
-            <span>
-              Proof. People. Production.
-              <a
-                href="https://github.com/PDGamerSG/Reporter-to-Release"
-                target="_blank"
-                rel="noreferrer"
-              >
-                View source
-                <ArrowUpRight size={12} />
-              </a>
-            </span>
-          </footer>
-        </main>
-      </div>
+                </>
+              )}
+              {view === "guide" && (
+                <section className="workflow-guide panel">
+                  <div className="guide-intro">
+                    <span className="stat-icon purple">
+                      <Workflow size={24} />
+                    </span>
+                    <h2>Close the loop, not just the ticket.</h2>
+                    <p>
+                      A report is a conversation with someone who needs their
+                      problem solved. Here’s how the desk keeps that person
+                      connected.
+                    </p>
+                  </div>
+                  {[
+                    {
+                      title: "A person reports what broke",
+                      description:
+                        "They use the public bug desk or the web form. The concierge keeps the steps and observed behavior; common personal details are redacted.",
+                      icon: MessageCircle,
+                    },
+                    {
+                      title: "The bug earns its evidence",
+                      description:
+                        "The reproducer writes and runs a failing regression. The original reporter gets the reproduction and confirms it using a private link or native card.",
+                      icon: FlaskConical,
+                    },
+                    {
+                      title: "A separate agent writes the fix",
+                      description:
+                        "The fixer receives the confirmed test and sanitized dossier. A reviewer checks the patch. A human owner approves and merges it.",
+                      icon: GitPullRequest,
+                    },
+                    {
+                      title: "Production makes it real",
+                      description:
+                        "The signed GitHub relay verifies that the production commit contains the merge. A merge alone never sends a release notice.",
+                      icon: Rocket,
+                    },
+                    {
+                      title: "Every reporter gets the last word",
+                      description:
+                        "Everyone in the cluster gets a notification. The reporter confirms the fix. If it still fails, the bug reopens and a new reproduction is required.",
+                      icon: ShieldCheck,
+                    },
+                  ].map((s, i) => (
+                    <div className="guide-step" key={s.title}>
+                      <span className="guide-step-number">{i + 1}</span>
+                      <div>
+                        <h3>
+                          <s.icon size={18} />
+                          {s.title}
+                        </h3>
+                        <p>{s.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="guide-actions">
+                    <Link className="button primary" href="/">
+                      Report a real bug
+                      <ArrowUpRight size={15} />
+                    </Link>
+                    <Link className="button secondary" href="/shoplite">
+                      Try the seeded bug
+                      <FlaskConical size={15} />
+                    </Link>
+                  </div>
+                </section>
+              )}
+            </>
+          )
+        )}
+        <footer className="app-footer">
+          <button className="text-link" onClick={() => changeView("guide")}>
+            Workflow guide
+          </button>
+          <a className="text-link" href="/api/export" download>
+            Export log
+          </a>
+          <a className="text-link" href="/shoplite">
+            ShopLite test app
+          </a>
+          <a
+            className="text-link"
+            href="https://github.com/PDGamerSG/Reporter-to-Release"
+            target="_blank"
+            rel="noreferrer"
+          >
+            View source
+            <ArrowUpRight size={13} />
+          </a>
+        </footer>
+      </main>
       {notice && (
         <div className="toast" role="status">
           <CheckCircle2 size={17} />
