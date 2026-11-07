@@ -1135,7 +1135,7 @@ export function Dashboard() {
                       </div>
                     ))}
                     <div className="guide-actions">
-                      <Link className="button primary" href="/report">
+                      <Link className="button primary" href="/">
                         Report a real bug
                         <ArrowUpRight size={15} />
                       </Link>
@@ -1255,10 +1255,10 @@ export function Dashboard() {
                 )}
                 Open live workspace
               </button>
-              <a className="text-link" href="/report">
+              <Link className="text-link" href="/">
                 I want to report a bug
                 <ArrowUpRight size={13} />
-              </a>
+              </Link>
             </form>
           )}
         </Modal>
@@ -1316,6 +1316,18 @@ export function Dashboard() {
                     <p>{current.dossier.expected}</p>
                   </section>
                 </div>
+                {current.triage && (
+                  <section className="steps-block">
+                    <h3>AI triage (advisory)</h3>
+                    <p>{current.triage.summary}</p>
+                    <p>
+                      Suggested severity: {current.triage.severity}.{" "}
+                      {current.triage.severityReason}
+                    </p>
+                    <p>{current.triage.likelyCause}</p>
+                    <p>Test idea: {current.triage.regressionTest}</p>
+                  </section>
+                )}
                 <section className="steps-block">
                   <h3>Steps to reproduce</h3>
                   <ol>

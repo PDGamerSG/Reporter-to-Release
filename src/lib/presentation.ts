@@ -1,5 +1,13 @@
 import { safeReporterText } from "./domain/airlock";
-import type { Cluster, Ledger, Report } from "./domain/types";
+import type { Cluster, Ledger, Report, Triage } from "./domain/types";
+
+/** Reporter-safe triage: billing figures stay on the server. */
+export function presentTriage(triage: Triage) {
+  const { costMicros: _cost, ...usage } = triage.usage;
+  void _cost;
+  return { ...triage, usage };
+}
+export type ReporterTriage = ReturnType<typeof presentTriage>;
 
 export function presentReporterCluster(cluster: Cluster, report: Report) {
   const reproduction = cluster.reproduction;
@@ -17,6 +25,7 @@ export function presentReporterCluster(cluster: Cluster, report: Report) {
     title: safeReporterText(cluster.title),
     state: cluster.state,
     dossier: { actual: safeReporterText(report.dossier.actual) },
+    triage: cluster.triage ? presentTriage(cluster.triage) : undefined,
     reproduction: reproduction
       ? {
           summary: safeReporterText(reproduction.summary),
@@ -51,7 +60,11 @@ export function presentWorkspace(ledger: Ledger, mode: "demo" | "live") {
   return {
     mode,
     revision: ledger.revision,
-    clusters: Object.values(ledger.clusters),
+    clusters: Object.values(ledger.clusters).map((cluster) =>
+      cluster.triage
+        ? { ...cluster, triage: presentTriage(cluster.triage) }
+        : cluster,
+    ),
     reports,
     events: ledger.events.slice(-300),
     outbox: ledger.outbox.map((j) => ({
@@ -92,6 +105,14 @@ export function presentWorkspace(ledger: Ledger, mode: "demo" | "live") {
         detail: ledger.githubLastEventAt
           ? `Last verified event ${ledger.githubLastEventAt}`
           : "Signed webhook receiver; waiting for its first event",
+      },
+      {
+        id: "model",
+        name: "Meta Model API",
+        status: process.env.MODEL_API_KEY ? "configured" : "disconnected",
+        detail: process.env.MODEL_API_KEY
+          ? "Advisory AI triage through the server-side proxy, with a spending cap"
+          : "Add MODEL_API_KEY to enable AI triage",
       },
       {
         id: "telegram",

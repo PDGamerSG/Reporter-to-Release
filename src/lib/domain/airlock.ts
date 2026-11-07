@@ -48,7 +48,7 @@ function normalize(text: string) {
 export function safeOutbound(text: string): string {
   return normalize(text)
     .replace(
-      /\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{16,}|AKIA[A-Z0-9]{16}|xox[baprs]-[\w-]{12,})\b/g,
+      /\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{16,}|LLM_\d{6,}_[\w.-]{8,}|AKIA[A-Z0-9]{16}|xox[baprs]-[\w-]{12,})\b/g,
       "[REDACTED SECRET]",
     )
     .replace(/\b(?:Bearer\s+)[\w.\-]{12,}/gi, "[REDACTED SECRET]");
