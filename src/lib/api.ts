@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { advanceDemo, seedDemo } from "./demo";
+import { engineeringApi } from "./engineering";
 import { digest, renderDossier, safeReporterText } from "./domain/airlock";
 import { acknowledgeJob, claimJobs } from "./domain/outbox";
 import { DomainError, execute, intake } from "./domain/workflow";
@@ -214,6 +215,8 @@ export async function handleApi(
     if (parts.join("/") === "webhooks/github" && method === "POST")
       return await githubWebhook(request, store);
     if (parts[0] === "worker") return await workerApi(request, parts, store);
+    if (parts[0] === "engineering")
+      return await engineeringApi(request, parts, store);
     if (method !== "GET" && method !== "HEAD") checkOrigin(request);
     const ctx = context(request);
 
