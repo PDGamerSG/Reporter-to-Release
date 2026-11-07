@@ -44,7 +44,12 @@ export function presentReporterCluster(cluster: Cluster, report: Report) {
 }
 export type ReporterCluster = ReturnType<typeof presentReporterCluster>;
 
-export function presentWorkspace(ledger: Ledger, mode: "demo" | "live") {
+export function presentWorkspace(
+  ledger: Ledger,
+  mode: "demo" | "live",
+  // Service health is real even in the demo, whose ledger has no heartbeat.
+  live: Ledger = ledger,
+) {
   const reports = Object.values(ledger.reports).map((r) => ({
     id: r.id,
     clusterId: r.clusterId,
@@ -56,9 +61,9 @@ export function presentWorkspace(ledger: Ledger, mode: "demo" | "live") {
     screenshots: r.screenshots?.length ?? 0,
   }));
   const connected =
-    ledger.workerHeartbeat &&
-    Date.now() - Date.parse(ledger.workerHeartbeat.at) < 90000 &&
-    ledger.workerHeartbeat.roomsConnected >= 2;
+    live.workerHeartbeat &&
+    Date.now() - Date.parse(live.workerHeartbeat.at) < 90000 &&
+    live.workerHeartbeat.roomsConnected >= 2;
   const heartbeat = mode === "live" ? ledger.engineeringHeartbeat : undefined;
   const heartbeatAge = heartbeat ? Date.now() - Date.parse(heartbeat.at) : NaN;
   const fresh = heartbeatAge >= 0 && heartbeatAge < 90000;
@@ -129,13 +134,13 @@ export function presentWorkspace(ledger: Ledger, mode: "demo" | "live") {
       {
         id: "github",
         name: "GitHub",
-        status: ledger.githubLastEventAt
+        status: live.githubLastEventAt
           ? "connected"
           : process.env.GITHUB_WEBHOOK_SECRET
             ? "configured"
             : "disconnected",
-        detail: ledger.githubLastEventAt
-          ? `Last verified event ${ledger.githubLastEventAt}`
+        detail: live.githubLastEventAt
+          ? `Last verified event ${live.githubLastEventAt}`
           : "Signed webhook receiver; waiting for its first event",
       },
       {
