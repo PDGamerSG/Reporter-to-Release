@@ -64,7 +64,7 @@ The first release record for `e28e764` was manually verified. The automation was
 
 ## Operate and recover
 
-- Check `/api/health`, the live Connections page, worker heartbeat age, pending outbox attempts, GitHub delivery failures, EC2 status, and available disk space.
+- Check `/api/health`, the live Connections page, concierge and engineering heartbeat age, pending outbox attempts, GitHub delivery failures, EC2 status, and available disk space. Engineering is connected only with a heartbeat younger than 90 seconds and all four role connections open. The crew page displays the reported model provider; this is connection evidence, not a successful inference claim.
 - Use SSM to inspect container status under `/opt/r2r`. Rebuild services using the checked-in deployment scripts. Preserve `worker-state`, `engineering-state`, the Switch credential file, and Docker database/certificate volumes.
 - A web rollback uses Vercel's previous known-good deployment. Keep the database; the current optional deployment-history field is compatible with older ledger documents. Re-run checks after restoring a prior application version.
 - Snapshot the encrypted EC2 volume and use the database provider's backup facilities according to your retention policy. A recovery is complete only after restoring data and checking intake, tracking, and an outbox delivery. A restore drill has not been performed for this deployment.

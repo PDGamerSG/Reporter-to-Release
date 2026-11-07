@@ -30,22 +30,28 @@ Sources: [build plan](BUILD_PLAN.md), [source](../src), [worker adapter](../work
 
 These are actual repository commit timestamps in UTC. The first checkpoint contains setup and the build plan, not the completed application. Work was committed incrementally; no dates or authors were backdated to imply earlier event activity.
 
-| Commit    | UTC, November 7, 2026 | Checkpoint                                                                            |
-| --------- | --------------------- | ------------------------------------------------------------------------------------- |
-| `c8cb769` | 10:33:46              | Application architecture and foundation, eight setup files.                           |
-| `d79d392` | 10:44:02              | Guarded domain lifecycle and durable delivery ledger.                                 |
-| `f1706e7` | 10:54:39              | Authenticated APIs, project worker, and the initial draft README.                     |
-| `e8a89ae` | 11:09:12              | Responsive dashboard and public reporter interface.                                   |
-| `fd4c961` | 11:28:48              | AWS/Switch setup and removal of the draft README.                                     |
-| `e28e764` | 11:57:40              | Review fixes, acceptance tests, CI, dependency audit, and reproducible host setup.    |
-| `5a7f378` | 12:07:53              | Initial live documentation, screenshots and explicit baseline attribution.            |
-| `c508b5e` | 13:03:29              | Concurrent frontend contribution: one-page home and cached advisory AI triage, PR #2. |
-| `7751be8` | 13:04:05              | Separate restricted engineering API.                                                  |
-| `08126f0` | 13:18:21              | Production recorder and merge preserving the frontend contribution.                   |
-| `4b42e0f` | 13:35:47              | Isolated AWS engineering stages and persistent execution receipts.                    |
-| `db5c014` | 13:58:06              | Native Switch receipt authentication, transport binding and patch quality gates.      |
+| Commit    | UTC, November 7, 2026 | Checkpoint                                                                                 |
+| --------- | --------------------- | ------------------------------------------------------------------------------------------ |
+| `c8cb769` | 10:33:46              | Application architecture and foundation, eight setup files.                                |
+| `d79d392` | 10:44:02              | Guarded domain lifecycle and durable delivery ledger.                                      |
+| `f1706e7` | 10:54:39              | Authenticated APIs, project worker, and the initial draft README.                          |
+| `e8a89ae` | 11:09:12              | Responsive dashboard and public reporter interface.                                        |
+| `fd4c961` | 11:28:48              | AWS/Switch setup and removal of the draft README.                                          |
+| `e28e764` | 11:57:40              | Review fixes, acceptance tests, CI, dependency audit, and reproducible host setup.         |
+| `5a7f378` | 12:07:53              | Initial live documentation, screenshots and explicit baseline attribution.                 |
+| `2694d39` | 12:58:50              | Original frontend branch: one-page home and cached advisory AI triage.                     |
+| `c2994c1` | 13:01:51              | Original frontend branch: conservative accounting for uncertain model calls.               |
+| `c508b5e` | 13:03:29              | Concurrent frontend contribution: one-page home and cached advisory AI triage, PR #2.      |
+| `7751be8` | 13:04:05              | Separate restricted engineering API.                                                       |
+| `08126f0` | 13:18:21              | Production recorder and merge preserving the frontend contribution.                        |
+| `4b42e0f` | 13:35:47              | Isolated AWS engineering stages and persistent execution receipts.                         |
+| `db5c014` | 13:58:06              | Native Switch receipt authentication, transport binding and patch quality gates.           |
+| `ea67202` | 14:19:49              | Backend guide and actual controlled acceptance evidence.                                   |
+| `9a1f241` | 14:55:34              | Merge of the original frontend branch ancestry into main; no source-tree change.           |
+| `cc6a5e2` | 15:05:42              | Restricted engineering heartbeat API and measured connection freshness contract.           |
+| `ed3c80e` | 15:16:05              | Live AWS heartbeat publishing, accurate frontend crew/connections, and browser acceptance. |
 
-The final documentation checkpoint is visible in [the repository history](https://github.com/PDGamerSG/Reporter-to-Release/commits/main). Reproduce the full record with `git log --reverse --format='%h %cI %s'`. The frontend contribution and restricted API were developed concurrently and retain their actual nearby timestamps. Commit spacing is not proof of original authorship; the baseline table above records reuse explicitly.
+The final documentation checkpoint is visible in [the repository history](https://github.com/PDGamerSG/Reporter-to-Release/commits/main). Reproduce the full record with `git log --reverse --format='%h %cI %s'`. The frontend contribution and restricted API were developed concurrently and retain their actual nearby timestamps. PR #2 squashed the two original frontend commits into `c508b5e`; merge `9a1f241` later retained their original ancestry without counting that code twice. New integration checkpoints keep at least ten minutes of actual elapsed time. No placeholder commits or rewritten timestamps were used. Commit spacing is not proof of original authorship; the baseline table above records reuse explicitly.
 
 ## What has and has not been demonstrated
 

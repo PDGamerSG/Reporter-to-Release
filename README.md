@@ -18,6 +18,8 @@ Reporter-to-Release gives people a way to report a bug and stay involved until i
 
 This repository contains the web app, guarded workflow API, durable ledger, Switch concierge, isolated AWS engineering service, production recorder, tests, and documentation. Web intake, AI triage, model-generated ShopLite regressions and draft fixes are live. Telegram and Slack are deferred. The home page lets a person describe a bug and read advisory triage beside it; `/desk` opens the operator workspace with a labeled isolated demo.
 
+The original one-page frontend branch is merged into `main`, including its original commits. The live workspace now reads the AWS engineering service's actual provider and room connections. Stale or partial connections cannot appear healthy, and the demo keeps its model roles illustrative. [Combined release evidence](docs/evidence/2026-11-07-combined-release.json) records the merge, checks and deployment.
+
 The controlled backend acceptance produced a real failing regression, original-reporter confirmation and [draft fix PR #4](https://github.com/PDGamerSG/Reporter-to-Release/pull/4), with 113 passing tests and all CI jobs green. This is a controlled test of the live backend. Human approval, merge and reporter-confirmed production resolution remain required. [The evidence record](docs/evidence/2026-11-07-backend-acceptance.json) contains actual revisions and measured output.
 
 Built for Flip the Switch, November 4–7, 2026. This repository's implementation began November 7. The concept and generic Switch client come from earlier research; [the contribution record](docs/EVENT_CONTRIBUTION.md) identifies that baseline and the new work without counting earlier benchmarks as event validation.
@@ -62,7 +64,7 @@ The API checks authority and lifecycle prerequisites on every write. The concier
 
 ## Screenshots
 
-Captured from the live custom domain on November 7, 2026 in Chromium at 1440 × 900, light theme, with reduced motion. Dashboard and dossier images show the labeled demo; the report form is in demo mode. ShopLite is the seeded test app.
+Captured on November 7, 2026 from the local production build of combined release `ed3c80e`, in Chromium at 1440 × 900, light theme, with reduced motion. Dashboard and dossier images show the labeled demo. The one-page report form has a sample selected without submitting it. ShopLite is the seeded test app. The production hostname and exact immutable release were checked separately in the linked release evidence.
 
 <p align="center">
   <img src="docs/images/evidence.png" width="860"
@@ -73,7 +75,7 @@ Captured from the live custom domain on November 7, 2026 in Chromium at 1440 × 
 <table>
   <tr>
     <td width="50%"><img src="docs/images/report.png"
-         alt="Public bug report form with observed behavior, expected result, and environment fields"></td>
+         alt="One-page reporter home with the selected coupon sample, report input, and field notes panel"></td>
     <td width="50%"><img src="docs/images/shoplite.png"
          alt="ShopLite test checkout showing the negative total after applying SAVE300"></td>
   </tr>
@@ -135,7 +137,7 @@ npm run start -- --port 3107
 npm run test:e2e
 ```
 
-Backend checkpoint `db5c014` passed 112 TypeScript tests, 20 Python unit tests, three actual Docker integration tests and 16 browser scenarios. The generated fix adds one regression, bringing its draft PR to 113 passing TypeScript tests. [CI](.github/workflows/ci.yml) also runs formatting, lint, types, audit and production build. The [test plan](docs/testing/test-plan.md) separates live acceptance evidence from simulations and explains how to run the Docker checks.
+The combined application passed 123 TypeScript tests, 21 Python unit tests and 18 browser scenarios. CI also runs three actual Docker integration tests, formatting, lint, types, dependency audit and production build. The controlled draft fix passed 113 TypeScript tests on its own earlier base. The [test plan](docs/testing/test-plan.md) separates live acceptance evidence from simulations and explains how to run the Docker checks.
 
 To run the seeded failing-to-passing example:
 

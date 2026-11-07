@@ -1,0 +1,254 @@
+{
+  "date": "2026-11-07",
+  "scope": "Combined frontend/backend release and real service liveness. Controlled draft fix remains subject to human review; no customer resolution is claimed.",
+  "repository": "https://github.com/PDGamerSG/Reporter-to-Release",
+  "publicForJudging": true,
+  "application": "https://reporter-to-release.pallabdas.me",
+  "team": "Vulcan",
+  "source": {
+    "integrationSha": "ed3c80e30ed4915c77ea085db41b79e141a2b9e0",
+    "frontendBranch": "feat/ai-triage-one-page",
+    "frontendBranchHead": "c2994c1f72adabfa4e45c555dd99a191be4629ad",
+    "originalFrontendCommits": [
+      "2694d3982bd40c77478b1bbcf69146059f72d831",
+      "c2994c1f72adabfa4e45c555dd99a191be4629ad"
+    ],
+    "previousSquash": "c508b5ef3feffa15def539fe945022a34647c618",
+    "historyMerge": "9a1f2415fdc334028b13fd453f2961e28e9a33ce",
+    "historyMergeChangedSourceTree": false,
+    "originalFrontendHeadIsAncestorOfMain": true,
+    "runtimeFileSha256": "272ab00312dd0cb3fbd5191792e962cdf0e53508db0b510ca1f4c24c574a7942"
+  },
+  "newCheckpoints": [
+    {
+      "sha": "9a1f2415fdc334028b13fd453f2961e28e9a33ce",
+      "at": "2026-11-07T14:55:34+00:00",
+      "subject": "merge: preserve original frontend branch history on main"
+    },
+    {
+      "sha": "cc6a5e29aea23902ab536b7414766546396c3c70",
+      "at": "2026-11-07T15:05:42+00:00",
+      "subject": "feat: expose authenticated AWS engineering liveness"
+    },
+    {
+      "sha": "ed3c80e30ed4915c77ea085db41b79e141a2b9e0",
+      "at": "2026-11-07T15:16:05+00:00",
+      "subject": "feat: connect frontend crew status to the live AWS runtime"
+    }
+  ],
+  "checkpointIntervalsSeconds": [608, 623],
+  "historyPolicy": "Actual original authors and timestamps retained. No placeholder commits, backdating or rewritten history.",
+  "validation": {
+    "sourceSha": "ed3c80e30ed4915c77ea085db41b79e141a2b9e0",
+    "typescriptTests": 123,
+    "pythonUnitTests": 21,
+    "dockerIntegrationTests": 3,
+    "browserScenarios": 18,
+    "format": "passed",
+    "types": "passed",
+    "lint": "passed",
+    "dependencyAudit": "0 vulnerabilities",
+    "productionBuild": "passed",
+    "localDockerCases": "3 skipped locally; 3 executed successfully in CI",
+    "ciRun": "https://github.com/PDGamerSG/Reporter-to-Release/actions/runs/42385545092",
+    "ciJobs": {
+      "application": "success",
+      "worker": "success",
+      "sandbox": "success"
+    }
+  },
+  "aws": {
+    "deployCommandId": "f16a10cb-b84f-4bc3-80f9-3fd61ab3b31c",
+    "verificationCommandId": "727d86f2-cdb0-4e6c-a934-c402fac7788e",
+    "status": "Success",
+    "verifiedAt": "2026-11-07T15:10:57.850Z",
+    "runtimeFileSha256": "272ab00312dd0cb3fbd5191792e962cdf0e53508db0b510ca1f4c24c574a7942",
+    "heartbeatIntervalSeconds": 30,
+    "containerLog": "Four engineering identities connected to Switch; engineering model muse-spark-1.3"
+  },
+  "liveWorkspace": {
+    "at": "2026-11-07T15:21:37.199968+00:00",
+    "engineering": {
+      "connected": true,
+      "fresh": true,
+      "roomsConnected": 4,
+      "provider": "meta",
+      "model": "muse-spark-1.3",
+      "lastSeenAt": "2026-11-07T15:21:36.463Z"
+    },
+    "integrations": [
+      {
+        "id": "database",
+        "name": "Postgres ledger",
+        "status": "connected",
+        "detail": "Durable storage with concurrent-write protection"
+      },
+      {
+        "id": "switch",
+        "name": "Switch",
+        "status": "connected",
+        "detail": "Public and engineering rooms connected"
+      },
+      {
+        "id": "engineering",
+        "name": "AWS engineering service",
+        "status": "connected",
+        "detail": "4 of 4 role connections; Meta / muse-spark-1.3. Model outcomes appear in each bug's audit trail."
+      },
+      {
+        "id": "github",
+        "name": "GitHub",
+        "status": "connected",
+        "detail": "Last verified event 2026-11-07T15:18:01.586Z"
+      },
+      {
+        "id": "model",
+        "name": "Meta Model API",
+        "status": "configured",
+        "detail": "Advisory AI triage through the server-side proxy, with a spending cap"
+      },
+      {
+        "id": "telegram",
+        "name": "Telegram",
+        "status": "disconnected",
+        "detail": "A bot token and forum group are required"
+      }
+    ],
+    "demoEngineering": null,
+    "demoEngineeringStatus": "demo",
+    "controlledAcceptance": [
+      {
+        "id": "R2R-0002",
+        "state": "review",
+        "fixHead": "496f9aae9d7e66865517ef4b6bde21473f281834",
+        "approvalCount": 0
+      }
+    ]
+  },
+  "production": {
+    "checkedAt": "2026-11-07T15:18:46.609818+00:00",
+    "sha": "ed3c80e30ed4915c77ea085db41b79e141a2b9e0",
+    "vercel": {
+      "id": "dpl_gLdpQTTuK8ougbQ3PAh95Jcue1Vd",
+      "url": "https://reporter-to-release-qefelzp2p-pallab-das-projects-d3f377fd.vercel.app",
+      "state": "READY",
+      "projectId": "prj_p7VIwQcUZo3uHYZeizYiFB4tqKgZ",
+      "teamId": "team_9DmQgMjE796WaejfWWU17kYK",
+      "target": "production"
+    },
+    "domain": {
+      "name": "reporter-to-release.pallabdas.me",
+      "verified": true,
+      "projectId": "prj_p7VIwQcUZo3uHYZeizYiFB4tqKgZ",
+      "aliasDeploymentId": "dpl_gLdpQTTuK8ougbQ3PAh95Jcue1Vd"
+    },
+    "https": {
+      "custom": "https://reporter-to-release.pallabdas.me",
+      "customStatus": 200,
+      "immutableStatus": 200,
+      "matchingAssets": 11,
+      "assetPaths": [
+        "/_next/static/immutable/chunks/0c0hxoamwjsbw.js",
+        "/_next/static/immutable/chunks/1-w3zpy6gup21.js",
+        "/_next/static/immutable/chunks/1vkbvs5cv4r1l.js",
+        "/_next/static/immutable/chunks/25kvgcvbp6c14.js",
+        "/_next/static/immutable/chunks/2gmei6acpg96t.css",
+        "/_next/static/immutable/chunks/2p53kkb69hb3l.js",
+        "/_next/static/immutable/chunks/39s0nn77ycexs.css",
+        "/_next/static/immutable/chunks/3c697kslgq7w8.js",
+        "/_next/static/immutable/chunks/3sav3yefleyvp.js",
+        "/_next/static/immutable/chunks/3x3430lgh-46d.js",
+        "/_next/static/immutable/chunks/turbopack-3xd-7z66s-4wg.js"
+      ],
+      "health": {
+        "status": "ok",
+        "service": "Reporter-to-Release",
+        "storage": "postgres",
+        "version": "1.1.0",
+        "ai": "configured"
+      },
+      "immutableHealth": {
+        "status": "ok",
+        "service": "Reporter-to-Release",
+        "storage": "postgres",
+        "version": "1.1.0",
+        "ai": "configured"
+      },
+      "normalTlsVerification": true
+    },
+    "runs": [
+      {
+        "id": 42385663611,
+        "name": "Record verified production",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/PDGamerSG/Reporter-to-Release/actions/runs/42385663611",
+        "head_sha": "ed3c80e30ed4915c77ea085db41b79e141a2b9e0"
+      },
+      {
+        "id": 42385545092,
+        "name": "Verify application",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/PDGamerSG/Reporter-to-Release/actions/runs/42385545092",
+        "head_sha": "ed3c80e30ed4915c77ea085db41b79e141a2b9e0"
+      }
+    ],
+    "githubDeployment": {
+      "id": 7622972406,
+      "sha": "ed3c80e30ed4915c77ea085db41b79e141a2b9e0",
+      "task": "verify:vercel-production",
+      "environment": "production",
+      "state": "success",
+      "environmentUrl": "https://reporter-to-release.pallabdas.me"
+    },
+    "signedWebhook": {
+      "id": "3852724567120289792",
+      "deliveredAt": "2026-11-07T15:18:01.609Z",
+      "statusCode": 200,
+      "event": "deployment_status"
+    }
+  },
+  "controlledFix": {
+    "pr": "https://github.com/PDGamerSG/Reporter-to-Release/pull/4",
+    "headSha": "496f9aae9d7e66865517ef4b6bde21473f281834",
+    "state": "draft, ready for human review",
+    "liveLedgerState": "review",
+    "humanApprovalRecorded": false,
+    "merged": false,
+    "reporterConfirmedProductionResolution": false
+  },
+  "screenshots": {
+    "sourceSha": "ed3c80e30ed4915c77ea085db41b79e141a2b9e0",
+    "environment": "Local production build with isolated storage; not a production incident capture. Demo content is labeled.",
+    "browser": "Chromium through ego-browser",
+    "appearance": "light theme, reduced motion",
+    "date": "2026-11-07",
+    "images": [
+      {
+        "path": "docs/images/hero.png",
+        "width": 1440,
+        "height": 900,
+        "sha256": "7d5e70d3f6ef1a26af715b9fa0b49429cb0f3c30b04c0cc2a3698cbae5b4a468"
+      },
+      {
+        "path": "docs/images/evidence.png",
+        "width": 1440,
+        "height": 900,
+        "sha256": "66fd8be20ca13411c1daabcaa26d6abd2a7f2d38082795dd72355f8cac8142cd"
+      },
+      {
+        "path": "docs/images/report.png",
+        "width": 1440,
+        "height": 900,
+        "sha256": "aff52d779b4ef28d1347d8b29c77c8d1a6f4442ec34c403fc2e7a9be09a64ce7"
+      },
+      {
+        "path": "docs/images/shoplite.png",
+        "width": 1440,
+        "height": 900,
+        "sha256": "b276b7cdf781be9203b607e39926a7478d253bc5546b6a27f9d5c2e83eb57f44"
+      }
+    ]
+  }
+}
