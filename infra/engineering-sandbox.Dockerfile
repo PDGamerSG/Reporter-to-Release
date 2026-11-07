@@ -3,6 +3,7 @@ WORKDIR /tooling
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts --no-audit --no-fund && chmod -R a+rX /tooling
 COPY infra/run-regression.sh /usr/local/bin/run-regression
+COPY infra/format-source.mjs /usr/local/bin/format-source.mjs
 RUN chmod 755 /usr/local/bin/run-regression
 WORKDIR /work
 USER 10001:10001

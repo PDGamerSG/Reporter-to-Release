@@ -364,9 +364,13 @@ async def test_handoff_accepts_the_native_switch_room_id_and_checks_sender(tmp_p
             for target in target_names:
                 await queues[target.removeprefix("vulcan-")].put(
                     SimpleNamespace(
-                        sender="manager-id", body="@" + target + "\n" + body
+                        sender="@switch-agent-transport:localhost",
+                        message_id="server-issued-event",
+                        addressed=True,
+                        body="@" + target + "\n" + body,
                     )
                 )
+            return {"event_id": "server-issued-event"}
 
         async def messages(self):
             yield await queues[self.name].get()
@@ -389,14 +393,28 @@ async def test_handoff_accepts_the_native_switch_room_id_and_checks_sender(tmp_p
         assert "reproducer" in room
 
 
-def test_switch_target_prefix_does_not_replace_sender_authentication():
+def test_switch_handoff_requires_the_authenticated_send_receipt():
     from r2r_engineering.runtime import handoff_matches
 
     task = '/engineering-task {"taskId":"unique-task"}'
-    message = SimpleNamespace(sender="manager-id", body="@vulcan-reproducer " + task)
-    assert handoff_matches(message, "manager-id", "vulcan-reproducer", task)
-    message.sender = "public-reporter"
-    assert not handoff_matches(message, "manager-id", "vulcan-reproducer", task)
-    message.sender = "manager-id"
+    message = SimpleNamespace(
+        sender="@switch-agent-transport:localhost",
+        message_id="server-issued-event",
+        addressed=True,
+        body="@vulcan-reproducer " + task,
+    )
+    assert handoff_matches(message, "server-issued-event", "vulcan-reproducer", task)
+    message.message_id = "unrelated-event"
+    assert not handoff_matches(
+        message, "server-issued-event", "vulcan-reproducer", task
+    )
+    message.message_id = "server-issued-event"
+    message.addressed = False
+    assert not handoff_matches(
+        message, "server-issued-event", "vulcan-reproducer", task
+    )
+    message.addressed = True
     message.body = "@vulcan-fixer " + task
-    assert not handoff_matches(message, "manager-id", "vulcan-reproducer", task)
+    assert not handoff_matches(
+        message, "server-issued-event", "vulcan-reproducer", task
+    )

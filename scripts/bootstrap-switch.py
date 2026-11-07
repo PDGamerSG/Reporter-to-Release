@@ -161,7 +161,9 @@ def main():
             "SWITCH_API_KEY": concierge["api_key"],
             "SWITCH_PUBLIC_ROOM": state["public_room"],
             "SWITCH_ENGINEERING_ROOM": state["engineering_room"],
-            "SWITCH_ENGINEERING_AGENT_IDS": manager["id"],
+            "SWITCH_ENGINEERING_AGENT_IDS": state.get(
+                "manager_transport_sender", manager["id"]
+            ),
             "SWITCH_MANAGER_NAME": "vulcan-manager",
         }
     )

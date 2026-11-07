@@ -1,5 +1,6 @@
 """Only bounded file edits and fixed, networkless regression commands are allowed."""
 
+import json
 import os
 import re
 import subprocess
@@ -49,6 +50,34 @@ class DockerSandbox:
     def run(self, root: Path, paths=()):
         if any(not re.fullmatch(r"tests/[\w.-]+\.test\.ts", path) for path in paths):
             raise ValueError("Only repository regression tests can execute.")
+        return self._execute(root, paths)
+
+    def format(self, root: Path, paths):
+        result = self._quality(root, paths, "format")
+        if result["exitCode"] != 0:
+            raise ValueError("The trusted source formatter failed.")
+        files = json.loads(result["output"])
+        if set(files) != set(paths):
+            raise ValueError("The formatter returned unexpected paths.")
+        return files
+
+    def validate(self, root: Path, paths):
+        return self._quality(root, paths, "validate")
+
+    def _quality(self, root, paths, operation):
+        if not paths or any(
+            path != SOURCE_PATH and not re.fullmatch(r"tests/[\w.-]+\.test\.ts", path)
+            for path in paths
+        ):
+            raise ValueError("Quality checks are restricted to the measured patch.")
+        return self._execute(
+            root,
+            ["--" + operation, *paths],
+            large_output=operation == "format",
+            memory="768m" if operation == "validate" else "384m",
+        )
+
+    def _execute(self, root, paths, large_output=False, memory="384m"):
         name = "r2r-test-" + uuid.uuid4().hex
         args = [
             "docker",
@@ -66,7 +95,7 @@ class DockerSandbox:
             "--user",
             "10001:10001",
             "--memory",
-            "384m",
+            memory,
             "--cpus",
             "0.75",
             "--pids-limit",
@@ -106,8 +135,11 @@ class DockerSandbox:
                 time.sleep(0.15)
             process.wait(timeout=15)
             output.seek(0)
-            text = output.read(24_000).decode(errors="replace")
-            text = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", text)[:12_000]
+            text = output.read(90_000 if large_output else 24_000).decode(
+                errors="replace"
+            )
+            if not large_output:
+                text = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", text)[:12_000]
         return {
             "exitCode": process.returncode if not limited else 124,
             "output": text,

@@ -23,6 +23,9 @@ def snapshot(tmp_path):
         "vitest.config.ts",
     ]:
         shutil.copy(repository / name, tmp_path / name)
+    for name in ["eslint.config.mjs", "next-env.d.ts"]:
+        if (repository / name).exists():
+            shutil.copy(repository / name, tmp_path / name)
     (tmp_path / "src/lib").mkdir(parents=True)
     (tmp_path / "tests").mkdir()
     (tmp_path / "scripts").mkdir()
@@ -81,3 +84,20 @@ it('has no orchestrator privileges', async()=>{
     result = DockerSandbox().run(root, [test])
     assert result["exitCode"] == 0, result["output"]
     assert "private-sentinel" not in result["output"]
+
+
+def test_quality_gate_rejects_a_passing_test_with_an_invalid_type(tmp_path):
+    root = snapshot(tmp_path)
+    test = "tests/quality.test.ts"
+    files = {
+        "src/lib/shoplite.ts": 'export function calculateTotal():number{return "bad";}',
+        test: "import{it,expect}from'vitest';import{calculateTotal}from'@/lib/shoplite';it('shows why types matter',()=>expect(calculateTotal()).toBe('bad'));",
+    }
+    apply_files(root, files, set(files))
+    sandbox = DockerSandbox()
+    formatted = sandbox.format(root, list(files))
+    apply_files(root, formatted, set(files))
+    assert sandbox.run(root, [test])["exitCode"] == 0
+    invalid = sandbox.validate(root, list(files))
+    assert invalid["exitCode"] != 0
+    assert "not assignable to type 'number'" in invalid["output"]

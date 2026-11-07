@@ -36,9 +36,11 @@ def main():
         for relative in [
             "worker",
             "scripts/bootstrap-switch.py",
+            "scripts/bind-switch-identity.py",
             "infra/engineering.compose.yml",
             "infra/engineering-sandbox.Dockerfile",
             "infra/run-regression.sh",
+            "infra/format-source.mjs",
             "package.json",
             "package-lock.json",
         ]:
@@ -62,7 +64,9 @@ def main():
     ).stdout.strip()
     bucket = f"r2r-deployment-{account}-{args.region}"
     checked = subprocess.run(
-        ["aws", "s3api", "head-bucket", "--bucket", bucket], capture_output=True
+        ["aws", "s3api", "head-bucket", "--bucket", bucket],
+        capture_output=True,
+        check=False,
     )
     if checked.returncode:
         subprocess.run(
@@ -184,6 +188,9 @@ def main():
             "mkdir -p engineering-state && chmod 700 engineering-state",
             "docker build -f infra/engineering-sandbox.Dockerfile -t r2r-regression:current .",
             "docker compose -f compose.yml -f override.yml -f infra/worker.compose.yml -f infra/engineering.compose.yml up -d --build engineering",
+            "docker exec -i r2r-engineering-1 python -m r2r_engineering.identity < switch-credentials.json > manager-transport.json",
+            "python3 scripts/bind-switch-identity.py",
+            "docker compose -f compose.yml -f override.yml -f infra/worker.compose.yml -f infra/engineering.compose.yml up -d --build worker",
         ]
     )
     payload = {
@@ -211,6 +218,7 @@ def main():
             ],
             capture_output=True,
             text=True,
+            check=False,
         )
     if result.returncode:
         detail = (
