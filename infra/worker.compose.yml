@@ -1,0 +1,19 @@
+services:
+  worker:
+    build: ./worker
+    restart: unless-stopped
+    env_file: worker.env
+    environment:
+      SWITCH_URL: http://switch:8000
+      WORKER_STATE_PATH: /state/worker.sqlite
+    volumes:
+      - ./worker-state:/state
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    mem_limit: 256m
+    pids_limit: 64

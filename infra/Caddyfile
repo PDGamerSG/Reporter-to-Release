@@ -1,0 +1,3 @@
+r2r-switch.pallabdas.me {
+    reverse_proxy switch:8000
+}
