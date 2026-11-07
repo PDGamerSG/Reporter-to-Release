@@ -33,18 +33,20 @@ ShopLite is a sandbox with no real payment processing. Its report link enters th
 
 Select **Open live workspace** and enter the configured owner access key. The status badge changes to **Live workspace**. Use **Workspace access** and **Return to the demo** to sign out. Owner access is a shared key for this deployment; there are no individual web accounts or SSO.
 
-| View                 | Use                                                                                                                                                                                 |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Overview / Bug inbox | Search, filter, and open clusters. Impact counts reflect linked reports.                                                                                                            |
-| Activity             | Inspect recorded workflow decisions and actor attribution.                                                                                                                          |
-| Releases             | See production release evidence and reporter confirmation state.                                                                                                                    |
-| Agent crew           | Read role responsibilities and access boundaries. The deployed AWS runtime uses one configured provider for its bounded ShopLite stages; UI provider labels describe role examples. |
-| Airlock              | Review held reports and replace unsafe input with clean observed facts.                                                                                                             |
-| Connections          | Read database, Switch heartbeat, GitHub relay, and deferred chat status.                                                                                                            |
-| Workflow guide       | Review the required evidence and human/reporter gates.                                                                                                                              |
+| View                 | Use                                                                                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Overview / Bug inbox | Search, filter, and open clusters. Impact counts reflect linked reports.                                                                                 |
+| Activity             | Inspect recorded workflow decisions and actor attribution.                                                                                               |
+| Releases             | See production release evidence and reporter confirmation state.                                                                                         |
+| Agent crew           | Read role responsibilities, access boundaries and the provider reported by AWS. The live manager is Python orchestration; demo model roles are examples. |
+| Airlock              | Review held reports and replace unsafe input with clean observed facts.                                                                                  |
+| Connections          | Read database, concierge and engineering heartbeats, GitHub relay, triage and deferred chat status.                                                      |
+| Workflow guide       | Review the required evidence and human/reporter gates.                                                                                                   |
 
 Record reproduction and fix evidence in the dossier dialog. The ledger requires the original reporter's confirmation before fixing and human review before a signed merge can advance it. A successful signed production deployment containing that merge unlocks release verification. Owner buttons cannot impersonate the live GitHub merge/deployment relay.
 
-**Current operating limit:** the AWS concierge worker is running, but engineering model runtimes need sign-in through Switch Console. Until then, a human owner can provide the evidence and perform engineering work through the same guarded workflow. No automatic model-written fix has been demonstrated live.
+Use **Refresh workspace** to load current activity and connection status. Engineering is connected only when all four role connections are open and its heartbeat is less than 90 seconds old. A connected service can still reach its model budget or fail an inference; inspect the bug's activity for the actual outcome.
+
+**Current operating limit:** the AWS service supports the normal ShopLite calculation module and its per-bug regression. It has produced a measured failing test and tested draft fix in a controlled live acceptance. Reports outside that scope need human investigation, and every draft fix still needs human review and merge. The active Meta API configuration needs no Switch Console provider sign-in. Chat integrations remain deferred.
 
 Sources: [dashboard](../src/components/dashboard.tsx), [API](../src/lib/api.ts), [relay](../src/lib/integrations/github.ts).

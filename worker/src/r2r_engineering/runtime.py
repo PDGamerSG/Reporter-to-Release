@@ -36,6 +36,7 @@ from r2r_engineering.state import State, eligible_stage
 
 log = logging.getLogger("r2r-engineering")
 ROLES = ("manager", "reproducer", "fixer", "reviewer")
+HEARTBEAT_INTERVAL = 30
 
 
 def handoff_matches(message, event_id, recipient, body):
@@ -69,10 +70,10 @@ class Runtime:
             self.root / "runtime.sqlite",
             int(os.environ.get("ENGINEERING_DAILY_MODEL_CALLS", "40")),
         )
-        provider = os.environ.get("ENGINEERING_MODEL_PROVIDER", "meta")
-        if provider == "bedrock":
+        self.provider = os.environ.get("ENGINEERING_MODEL_PROVIDER", "meta")
+        if self.provider == "bedrock":
             self.model = Bedrock(self.state)
-        elif provider == "meta":
+        elif self.provider == "meta":
             self.model = Meta(self.state, os.environ.get("MODEL_API_KEY", ""))
         else:
             raise ValueError("Configure an available engineering model provider.")
@@ -549,37 +550,62 @@ class Runtime:
             await self.note(bug, reason)
             log.warning("%s %s blocked: %s", bug, stage, type(error).__name__)
 
+    async def heartbeat(self, connections):
+        while True:
+            try:
+                response = await self.api.post(
+                    "/api/engineering/heartbeat",
+                    json={
+                        "roomsConnected": sum(c.is_connected for c in connections),
+                        "provider": self.provider,
+                        "model": self.model.model,
+                        "version": "1.1.0",
+                    },
+                )
+                response.raise_for_status()
+            except Exception as error:  # noqa: BLE001 -- liveness must not interrupt measured work
+                log.warning("Engineering heartbeat failed: %s", type(error).__name__)
+            await asyncio.sleep(HEARTBEAT_INTERVAL)
+
     async def run(self):
         async with AsyncExitStack() as stack:
+            connections = []
             for role, client in self.clients.items():
-                await stack.enter_async_context(
-                    client.connect(
-                        os.environ["SWITCH_ENGINEERING_ROOM"],
-                        "r2r-" + role + "-main-v1",
-                        only_addressed=True,
+                connections.append(
+                    await stack.enter_async_context(
+                        client.connect(
+                            os.environ["SWITCH_ENGINEERING_ROOM"],
+                            "r2r-" + role + "-main-v1",
+                            only_addressed=True,
+                        )
                     )
                 )
             log.info(
                 "Four engineering identities connected to Switch; engineering model %s",
                 self.model.model,
             )
-            while True:
-                try:
-                    cursor = ""
-                    while True:
-                        response = await self.api.get(
-                            "/api/engineering/work", params={"after": cursor}
-                        )
-                        response.raise_for_status()
-                        batch = response.json()
-                        for cluster in batch["clusters"]:
-                            await self.process(cluster)
-                        cursor = batch.get("nextCursor")
-                        if not cursor:
-                            break
-                except Exception as error:  # noqa: BLE001 -- supervise the long-running service
-                    log.warning("Engineering poll failed: %s", type(error).__name__)
-                await asyncio.sleep(20)
+            heartbeat = asyncio.create_task(self.heartbeat(connections))
+            try:
+                while True:
+                    try:
+                        cursor = ""
+                        while True:
+                            response = await self.api.get(
+                                "/api/engineering/work", params={"after": cursor}
+                            )
+                            response.raise_for_status()
+                            batch = response.json()
+                            for cluster in batch["clusters"]:
+                                await self.process(cluster)
+                            cursor = batch.get("nextCursor")
+                            if not cursor:
+                                break
+                    except Exception as error:  # noqa: BLE001 -- supervise the long-running service
+                        log.warning("Engineering poll failed: %s", type(error).__name__)
+                    await asyncio.sleep(20)
+            finally:
+                heartbeat.cancel()
+                await asyncio.gather(heartbeat, return_exceptions=True)
 
 
 def main():

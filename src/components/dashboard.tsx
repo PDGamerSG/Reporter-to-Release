@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
+  Cpu,
   ExternalLink,
   FlaskConical,
   GitBranch,
@@ -83,7 +84,7 @@ const crew = [
   },
   {
     name: "Bug manager",
-    vendor: "Claude / configurable",
+    vendor: "Python orchestration",
     initials: "M",
     color: "purple",
     role: "Groups reports and coordinates the handoffs",
@@ -91,7 +92,7 @@ const crew = [
   },
   {
     name: "Reproducer",
-    vendor: "Claude / configurable",
+    vendor: "Example role",
     initials: "R",
     color: "amber",
     role: "Proves the bug with a failing test",
@@ -99,15 +100,15 @@ const crew = [
   },
   {
     name: "Fixer",
-    vendor: "Codex / configurable",
+    vendor: "Example role",
     initials: "F",
     color: "blue",
     role: "Turns the confirmed regression green",
-    access: "Per-bug worktree. Opens a PR; never merges.",
+    access: "Per-bug worktree. Opens a draft PR; never merges.",
   },
   {
     name: "Reviewer",
-    vendor: "OpenCode / configurable",
+    vendor: "Example role",
     initials: "R",
     color: "pink",
     role: "Checks the fix, evidence, and risk",
@@ -134,6 +135,12 @@ async function fetchWorkspace(): Promise<Workspace> {
 
 export function Dashboard() {
   const [data, setData] = useState<Workspace>();
+  const engineeringVendor =
+    data?.mode !== "live"
+      ? "Example role"
+      : data.engineering?.fresh
+        ? `${data.engineering.provider === "meta" ? "Meta" : "Amazon Bedrock"} / ${data.engineering.model}`
+        : "Waiting for engineering service";
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<View>("overview");
@@ -952,7 +959,9 @@ export function Dashboard() {
                         These are the workflow’s configured roles.{" "}
                         {data.mode === "demo"
                           ? "Example activity is simulated."
-                          : "Vendor execution requires an authenticated provider in Switch Console."}
+                          : data.engineering?.fresh
+                            ? `${data.engineering.roomsConnected} of 4 engineering role connections. Model outcomes are recorded in each bug’s activity.`
+                            : "Waiting for a fresh engineering heartbeat from AWS. Model outcomes are recorded in each bug’s activity."}
                       </span>
                     </div>
                     <div className="crew-grid">
@@ -969,7 +978,11 @@ export function Dashboard() {
                             </span>
                           </div>
                           <h2>{a.name}</h2>
-                          <span className="vendor-label">{a.vendor}</span>
+                          <span className="vendor-label">
+                            {a.name === "Concierge" || a.name === "Bug manager"
+                              ? a.vendor
+                              : engineeringVendor}
+                          </span>
                           <p>{a.role}</p>
                           <div className="agent-access">
                             <Shield size={14} />
@@ -1030,6 +1043,8 @@ export function Dashboard() {
                                 <Zap />
                               ) : i.id === "github" ? (
                                 <GitPullRequest />
+                              ) : i.id === "engineering" || i.id === "model" ? (
+                                <Cpu />
                               ) : (
                                 <MessageCircle />
                               )}
@@ -1048,7 +1063,11 @@ export function Dashboard() {
                                 ? "AWS hosts the persistent room worker."
                                 : i.id === "github"
                                   ? "Only signed events from the connected repository are accepted."
-                                  : "Connect a Telegram forum group through Switch."}
+                                  : i.id === "engineering"
+                                    ? "AWS coordinates measured regressions and draft fixes."
+                                    : i.id === "model"
+                                      ? "Advisory triage uses a server-side spending cap."
+                                      : "Chat is optional; web reports are available now."}
                           </div>
                         </section>
                       ))}
@@ -1061,15 +1080,18 @@ export function Dashboard() {
                         services.
                       </p>
                       <ol>
-                        <li>Run the pinned Switch stack and worker on AWS.</li>
-                        <li>Connect Telegram and Slack in Switch Console.</li>
+                        <li>Send a web report from the home page.</li>
                         <li>
-                          Install the desk template and authenticate the chosen
-                          providers.
+                          Confirm the AWS reproducer’s failing test using your
+                          private tracking link.
                         </li>
                         <li>
-                          Add the signed GitHub webhook, then send a test
-                          report.
+                          Review the tested draft fix. A human owner approves
+                          and merges it.
+                        </li>
+                        <li>
+                          After the verified production deployment, check the
+                          fix and confirm it or reopen the report.
                         </li>
                       </ol>
                       <External href="https://github.com/PDGamerSG/Reporter-to-Release#quick-start">

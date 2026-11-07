@@ -418,3 +418,87 @@ def test_switch_handoff_requires_the_authenticated_send_receipt():
     assert not handoff_matches(
         message, "server-issued-event", "vulcan-reproducer", task
     )
+
+
+@pytest.mark.asyncio
+async def test_heartbeat_retries_while_model_stage_is_busy_and_stops_with_runtime(
+    monkeypatch,
+):
+    import json
+
+    import r2r_engineering.runtime as module
+
+    monkeypatch.setenv("SWITCH_ENGINEERING_ROOM", "private-engineering-room")
+    monkeypatch.setattr(module, "HEARTBEAT_INTERVAL", 0.01, raising=False)
+    runtime = Runtime.__new__(Runtime)
+    runtime.provider = "meta"
+    runtime.model = SimpleNamespace(model="muse-spark-1.3", key="private-model-key")
+    processing = asyncio.Event()
+    received = asyncio.Event()
+    closed = []
+    payloads = []
+    rooms = [SimpleNamespace(is_connected=i < 3) for i in range(4)]
+
+    class Client:
+        def __init__(self, index):
+            self.index = index
+
+        @asynccontextmanager
+        async def connect(self, room, connection_id, only_addressed):
+            assert room == "private-engineering-room"
+            try:
+                yield rooms[self.index]
+            finally:
+                closed.append(self.index)
+
+    runtime.clients = {name: Client(i) for i, name in enumerate(module.ROLES)}
+
+    async def process(cluster):
+        processing.set()
+        await asyncio.Event().wait()  # A slow external model or sandbox operation.
+
+    async def handle(request):
+        if request.url.path == "/api/engineering/work":
+            return httpx.Response(200, json={"clusters": [{"id": "R2R-0002"}]})
+        assert request.url.path == "/api/engineering/heartbeat"
+        assert request.headers["Authorization"] == "Bearer private-service-key"
+        await processing.wait()
+        payloads.append(json.loads(request.content))
+        if len(payloads) == 1:
+            rooms[2].is_connected = False
+            return httpx.Response(503)
+        received.set()
+        return httpx.Response(200, json={"ok": True})
+
+    runtime.process = process
+    async with httpx.AsyncClient(
+        base_url="https://desk.example",
+        transport=httpx.MockTransport(handle),
+        headers={"Authorization": "Bearer private-service-key"},
+    ) as http:
+        runtime.api = http
+        task = asyncio.create_task(runtime.run())
+        try:
+            await asyncio.wait_for(received.wait(), timeout=0.5)
+        finally:
+            task.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await task
+        count = len(payloads)
+        await asyncio.sleep(0.03)
+        assert len(payloads) == count  # The background heartbeat was cancelled.
+    assert payloads[:2] == [
+        {
+            "roomsConnected": 3,
+            "provider": "meta",
+            "model": "muse-spark-1.3",
+            "version": "1.1.0",
+        },
+        {
+            "roomsConnected": 2,
+            "provider": "meta",
+            "model": "muse-spark-1.3",
+            "version": "1.1.0",
+        },
+    ]
+    assert sorted(closed) == [0, 1, 2, 3]

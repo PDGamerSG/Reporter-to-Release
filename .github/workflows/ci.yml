@@ -13,6 +13,7 @@ jobs:
       SESSION_SECRET: ci-session-secret-with-at-least-thirty-two-characters
       ADMIN_TOKEN: ci-owner-key-for-isolated-tests
       WORKER_TOKEN: ci-worker-key-for-isolated-tests
+      ENGINEERING_TOKEN: ci-engineering-key-for-isolated-tests
       APP_URL: http://127.0.0.1:3107
     steps:
       - uses: actions/checkout@v4

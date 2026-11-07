@@ -30,6 +30,10 @@ Check the worker container and its most recent heartbeat. The UI calls Switch co
 
 An unacknowledged job becomes available after its lease expires. Failed jobs retry with delay. Inspect error categories without printing environment variables. Keep the receipt volume when replacing the worker. Sources: [presentation](../src/lib/presentation.ts), [outbox](../src/lib/domain/outbox.ts), [worker](../worker/src/r2r_worker/main.py).
 
+## Engineering shows disconnected
+
+Use **Refresh workspace** and check the last engineering heartbeat. The service publishes every 30 seconds independently of model and sandbox work. All four role connections must be open and the server timestamp must be less than 90 seconds old. Partial, stale or missing heartbeats remain disconnected. Check `r2r-engineering-1`, Switch room membership and the separate matching `ENGINEERING_TOKEN`; the concierge token cannot publish engineering status. A healthy heartbeat proves connections, while individual model failures remain in the bug's activity. Source: [engineering runbook](operations/engineering-runtime.md).
+
 ## The manager receives a dossier but no fix appears
 
 Check `r2r-engineering-1` through SSM and read the bug's engineering notes. The deployed service supports only normal ShopLite calculation reports. Unsupported reports, missing facts, exhausted model calls, failed baseline checks and rejected advisory reviews stop with an honest note. A reproduction must be confirmed by its original reporter before the fixer can run. A produced draft PR still needs human review and merge.
@@ -52,4 +56,4 @@ The host setup pins Docker Compose 2.40.3 and Buildx 0.29.1 with verified downlo
 
 Playwright expects an already-running server. Start `npm run dev -- --port 3107`, or build and use `npm run start -- --port 3107`, then run `npm run test:e2e`. Do not run a production build against the same `.next` directory while a development test run is in progress. Install Chromium with `npx playwright install chromium`.
 
-CI starts its own production server and uses isolated configuration. The owner spec disables traces because traces can retain private form values and authenticated traffic. Source: [CI](../.github/workflows/ci.yml), [browser config](../playwright.config.ts), [owner test](../e2e/owner.spec.ts).
+CI starts its own production server and uses isolated configuration. The owner and service-status specs disable traces because traces can retain private form values and authenticated traffic. Service-status fixtures skip hosted or Postgres-backed environments; use a loopback server with `DATABASE_URL=''` and matching isolated owner and engineering keys. Source: [CI](../.github/workflows/ci.yml), [browser config](../playwright.config.ts), [owner test](../e2e/owner.spec.ts), [service-status tests](../e2e/service-status.spec.ts).
