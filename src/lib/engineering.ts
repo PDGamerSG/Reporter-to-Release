@@ -24,28 +24,26 @@ export async function engineeringApi(
     throw new DomainError("Valid engineering credentials are required.", 401);
   if (request.method === "GET" && parts.join("/") === "engineering/work") {
     const { ledger } = await store.read("live");
+    const after = new URL(request.url).searchParams.get("after") ?? "";
+    const work = Object.values(ledger.clusters)
+      .filter((c) =>
+        ["new", "reopened", "reproducing", "confirmed", "fixing"].includes(
+          c.state,
+        ),
+      )
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .filter((c) => c.id.localeCompare(after) > 0);
     return json({
-      clusters: Object.values(ledger.clusters)
-        .filter((c) =>
-          [
-            "new",
-            "reopened",
-            "reproducing",
-            "confirmed",
-            "fixing",
-            "review",
-          ].includes(c.state),
-        )
-        .slice(0, 100)
-        .map((c) => ({
-          id: c.id,
-          state: c.state,
-          dossier: c.dossier,
-          reporterConfirmedAt: c.reporterConfirmedAt,
-          reproduction: c.reproduction,
-          githubIssue: c.githubIssue,
-          fix: c.fix && { prUrl: c.fix.prUrl, headSha: c.fix.headSha },
-        })),
+      nextCursor: work.length > 100 ? work[99].id : null,
+      clusters: work.slice(0, 100).map((c) => ({
+        id: c.id,
+        state: c.state,
+        dossier: c.dossier,
+        reporterConfirmedAt: c.reporterConfirmedAt,
+        reproduction: c.reproduction,
+        githubIssue: c.githubIssue,
+        fix: c.fix && { prUrl: c.fix.prUrl, headSha: c.fix.headSha },
+      })),
     });
   }
   if (request.method === "POST" && parts[1] === "bugs" && parts[2]) {

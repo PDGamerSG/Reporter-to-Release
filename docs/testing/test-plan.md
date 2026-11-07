@@ -37,6 +37,8 @@ The eight scenarios cover queue search, evidence and Escape dismissal, session i
 
 Set `E2E_BASE_URL` for another already-running environment. The suite mutates only isolated demo data, aside from a read-only live owner session. It does not submit a new live report or fake GitHub production events. The owner test disables tracing to protect credentials. Source: [browser config](../../playwright.config.ts), [workspace spec](../../e2e/workspace.spec.ts), [owner spec](../../e2e/owner.spec.ts).
 
+The one-page suite ([e2e/one-page.spec.ts](../../e2e/one-page.spec.ts)) mocks the model so CI needs no key. It covers complete output on desktop and mobile, accessibility before and after a result, failed triage and retry, quarantine, short input, live versus sample routing, the old `/report` address, and the tracker. Model behavior was checked separately against the real API, because mocks cannot prove it.
+
 ## Executable failing-to-passing example
 
 ```bash

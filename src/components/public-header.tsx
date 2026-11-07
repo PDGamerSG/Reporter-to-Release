@@ -10,8 +10,8 @@ export function PublicHeader() {
         Reporter-to-Release
       </Link>
       <nav>
-        <Link href="/report">Report a bug</Link>
-        <Link href="/">
+        <Link href="/">Report a bug</Link>
+        <Link href="/desk">
           Open bug desk
           <ArrowUpRight size={11} />
         </Link>

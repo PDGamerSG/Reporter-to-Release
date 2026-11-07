@@ -16,7 +16,7 @@ Live link: [reporter-to-release.pallabdas.me](https://reporter-to-release.pallab
 
 Reporter-to-Release gives people a way to report a bug and stay involved until its fix works for them. The desk groups duplicate reports, records a failing reproduction, asks the reporter to confirm it, and requires human review before a production release can close the loop. If a reporter still sees the failure, the bug reopens.
 
-This repository contains the web app, guarded workflow API, durable ledger, Switch worker, deployment scripts, tests, and documentation. Web intake and the AWS Switch handoff are live. Engineering model runtimes still need provider sign-in; Telegram and Slack are deferred. The public dashboard opens an isolated demo with clearly labeled simulated progress.
+This repository contains the web app, guarded workflow API, durable ledger, Switch worker, deployment scripts, tests, and documentation. Web intake, AI triage, and the AWS Switch handoff are live. Telegram and Slack are deferred. The home page is one small screen: a person describes a bug and reads the AI triage beside it. The operator workspace at `/desk` opens an isolated demo with clearly labeled simulated progress.
 
 Built for Flip the Switch, November 4–7, 2026. This repository's implementation began November 7. The concept and generic Switch client come from earlier research; [the contribution record](docs/EVENT_CONTRIBUTION.md) identifies that baseline and the new work without counting earlier benchmarks as event validation.
 
@@ -25,6 +25,7 @@ Built for Flip the Switch, November 4–7, 2026. This repository's implementatio
 | Feature                | What it does                                                                                                                  |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | Web bug reports        | Accepts observed behavior and gives each reporter a private tracking link.                                                    |
+| AI triage              | Returns an advisory summary, severity, likely cause, reproduction steps, and regression test idea from a server-side proxy.   |
 | Privacy airlock        | Redacts known personal-data and secret patterns, discards raw input, and holds detected instructions for human review.        |
 | Duplicate clusters     | Links similar reports so affected people share evidence and release updates.                                                  |
 | Proof before fixing    | Requires reproduction evidence and original-reporter confirmation before a fix can start.                                     |
@@ -118,7 +119,7 @@ uv run --project worker pytest -c worker/pyproject.toml worker/tests -q
 uv run --project worker ruff check worker/src/r2r_worker worker/tests
 ```
 
-For the eight browser scenarios, install Chromium, start the built app on port 3107 in another terminal, and run Playwright:
+For the 16 browser scenarios, install Chromium, start the built app on port 3107 in another terminal, and run Playwright:
 
 ```bash
 npx playwright install chromium
@@ -127,7 +128,7 @@ npm run start -- --port 3107
 npm run test:e2e
 ```
 
-The verified implementation passes 46 TypeScript tests and 7 worker tests. [CI](.github/workflows/ci.yml) runs checks, audit, build, and browser acceptance on main pushes and PRs using isolated configuration. The [test plan](docs/testing/test-plan.md) separates live acceptance evidence from simulations.
+The verified implementation passes 66 TypeScript tests, 7 worker tests, and 16 browser scenarios. [CI](.github/workflows/ci.yml) runs checks, audit, build, and browser acceptance on main pushes and PRs using isolated configuration. The [test plan](docs/testing/test-plan.md) separates live acceptance evidence from simulations.
 
 To run the seeded failing-to-passing example:
 
@@ -148,9 +149,10 @@ Configure production secrets, initialize the ledger with `npm run db:init`, depl
 
 | Path                                | What it holds                                                                         |
 | ----------------------------------- | ------------------------------------------------------------------------------------- |
-| `src/app/`                          | Dashboard, report/tracking pages, ShopLite, and API route.                            |
-| `src/components/`                   | Operator workspace, public forms, tracker, dialogs, and lifecycle UI.                 |
+| `src/app/`                          | One-page reporter home, `/desk`, tracking page, ShopLite, and API route.              |
+| `src/components/`                   | Reporter page, operator workspace, tracker, dialogs, and lifecycle UI.                |
 | `src/lib/domain/`                   | Airlock, clustering, guarded transitions, audit events, and outbox.                   |
+| `src/lib/ai/`                       | Server-side model proxy, cached prompt prefix, and spending guard.                    |
 | `src/lib/store/`                    | Memory, local file, and Postgres compare-and-swap stores.                             |
 | `src/lib/integrations/`             | Signed GitHub review, merge, and deployment relay.                                    |
 | `worker/src/r2r_worker/`            | Project-specific Switch adapter and native identity boundary.                         |
@@ -178,6 +180,8 @@ Configure production secrets, initialize the ledger with `npm run db:init`, depl
 
 - Engineering model runtimes need provider sign-in. The registered manager destination does not run a model by itself; no live autonomous fix PR is claimed.
 - Telegram and Slack are deferred. Web reporters read updates on their private tracking page; email and push notifications are not implemented.
+- AI triage is advisory. It never changes severity or workflow state, and it reads only the sanitized dossier, so it cannot see redacted details or the codebase. Its likely cause is an unverified hypothesis.
+- The app's spending cap counts this app's calls only. It cannot read the provider's credit balance, so check that in the Model API dashboard.
 - Redaction and instruction detection are heuristic. Voice reports and screenshot uploads are not supported by the web form.
 - Authorized engineering actors supply test output and changed paths. The ledger does not execute those tests or independently verify that evidence.
 - Owner access uses a shared key. Sensitive approval gates require verified GitHub identities; a second authorized human must be configured for those fixes.

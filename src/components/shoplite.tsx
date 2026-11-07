@@ -171,7 +171,7 @@ export function ShopLite() {
           <pre className="code-block">
             npm run demo:reproduce{"\n"}npm run demo:reproduce -- --fixed
           </pre>
-          <Link className="text-link" href={`/report?${report}`}>
+          <Link className="text-link" href={`/?${report}`}>
             Send this bug to the demo desk
             <ArrowUpRight size={13} />
           </Link>
