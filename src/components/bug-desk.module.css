@@ -129,6 +129,54 @@
   opacity: 0.85;
   cursor: default;
 }
+.attach {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 12px;
+}
+.attachButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 2px dashed var(--soft);
+  border-radius: var(--edge);
+  color: var(--line);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.attachButton span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attachButton:focus-within {
+  border-color: var(--marker);
+}
+.attachButton input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.attachRemove {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--line);
+}
+.attach p {
+  flex: 1 1 100%;
+  color: var(--soft);
+  font-size: 13px;
+}
 .error {
   margin-top: 10px;
   padding: 8px 12px;

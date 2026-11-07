@@ -25,6 +25,12 @@ export interface Dossier {
   environment: string;
   safety: { quarantined: boolean; signals: string[]; piiRedacted: string[] };
 }
+export interface Screenshot {
+  key: string;
+  type: string;
+  size: number;
+  at: string;
+}
 export interface Report {
   id: string;
   clusterId: string;
@@ -38,6 +44,9 @@ export interface Report {
   route?: { roomId: string; threadId?: string; platformUserId?: string };
   reproductionConfirmed?: boolean;
   releaseConfirmed?: boolean;
+  telegram?: { chatId: number; linkedAt: string };
+  telegramLink?: { codeHash: string; expiresAt: string };
+  screenshots?: Screenshot[];
 }
 export interface Reproduction {
   summary: string;
@@ -152,6 +161,7 @@ export interface Ledger {
   reports: Record<string, Report>;
   events: AuditEvent[];
   outbox: OutboxJob[];
+  screenshotUploads?: string[];
   deliveries: Record<string, string>;
   createdAt: string;
   workerHeartbeat?: { at: string; roomsConnected: number; version: string };

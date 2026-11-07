@@ -24,7 +24,9 @@ type Tracking = {
     createdAt: string;
     reproductionConfirmed?: boolean;
     releaseConfirmed?: boolean;
+    telegramLinked?: boolean;
   };
+  telegramAvailable?: boolean;
   events: AuditEvent[];
 };
 async function fetchTracking(
@@ -53,6 +55,7 @@ export function Tracker({ reportId }: { reportId: string }) {
   const [rejecting, setRejecting] = useState(false);
   const [evidence, setEvidence] = useState("");
   const [notice, setNotice] = useState("");
+  const [telegramUrl, setTelegramUrl] = useState("");
   const request = useCallback(
     async (answer?: {
       phase: string;
@@ -81,6 +84,23 @@ export function Tracker({ reportId }: { reportId: string }) {
       active = false;
     };
   }, [reportId]);
+  async function linkTelegram() {
+    setBusy(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/track/${reportId}/telegram`, {
+        method: "POST",
+        headers: { "x-reporter-token": window.location.hash.slice(1) },
+      });
+      const value = await response.json();
+      if (!response.ok) throw new Error(value.error);
+      setTelegramUrl(value.url);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Telegram could not connect.");
+    } finally {
+      setBusy(false);
+    }
+  }
   async function answer(confirmed: boolean) {
     if (!data) return;
     setBusy(true);
@@ -157,6 +177,40 @@ export function Tracker({ reportId }: { reportId: string }) {
                 <div className="sanitized-note" role="status">
                   <CheckCircle2 size={17} />
                   {notice}
+                </div>
+              )}
+              {data.report.telegramLinked && (
+                <div className="sanitized-note" role="status">
+                  <CheckCircle2 size={17} />
+                  Telegram updates are on. Send /stop to the bot to end them.
+                </div>
+              )}
+              {data.telegramAvailable && !data.report.telegramLinked && (
+                <div className="tracking-actions">
+                  <h3>
+                    <MessageCircle size={16} /> Get updates on Telegram
+                  </h3>
+                  <p>We message you when this bug changes.</p>
+                  <div className="button-row">
+                    {telegramUrl ? (
+                      <a
+                        className="button primary"
+                        href={telegramUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open Telegram
+                      </a>
+                    ) : (
+                      <button
+                        className="button secondary"
+                        disabled={busy}
+                        onClick={linkTelegram}
+                      >
+                        Connect Telegram
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
               {data.cluster.state === "awaiting_reporter" && (

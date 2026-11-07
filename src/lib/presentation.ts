@@ -1,3 +1,4 @@
+import { telegramConfigured } from "./integrations/telegram";
 import { safeReporterText } from "./domain/airlock";
 import type { Cluster, Ledger, Report, Triage } from "./domain/types";
 
@@ -52,6 +53,7 @@ export function presentWorkspace(ledger: Ledger, mode: "demo" | "live") {
     createdAt: r.createdAt,
     reproductionConfirmed: r.reproductionConfirmed,
     releaseConfirmed: r.releaseConfirmed,
+    screenshots: r.screenshots?.length ?? 0,
   }));
   const connected =
     ledger.workerHeartbeat &&
@@ -147,13 +149,10 @@ export function presentWorkspace(ledger: Ledger, mode: "demo" | "live") {
       {
         id: "telegram",
         name: "Telegram",
-        status:
-          process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_WEBHOOK_SECRET
-            ? "configured"
-            : "disconnected",
-        detail: process.env.TELEGRAM_BOT_TOKEN
-          ? "Bot credentials configured"
-          : "A bot token and forum group are required",
+        status: telegramConfigured() ? "configured" : "disconnected",
+        detail: telegramConfigured()
+          ? `Reporters can link a tracker to @${process.env.TELEGRAM_BOT_USERNAME}`
+          : "A bot username and webhook secret are required",
       },
     ],
   };

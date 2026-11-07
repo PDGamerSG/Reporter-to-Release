@@ -75,7 +75,7 @@ The first release record for `e28e764` was manually verified. The automation was
 
 The active [AWS engineering service](engineering-runtime.md) runs manager, reproducer, fixer and advisory reviewer identities with the explicitly configured Meta provider. It creates private per-bug rooms and runs generated code in networkless containers. The templates remain reference descriptions; the runtime implements the bounded ShopLite flow directly. A native Bedrock adapter is available, but real-work calls were blocked by account quota. No provider-console sign-in is required for the active Meta API configuration.
 
-Telegram and Slack are explicitly deferred. Install their bridges through Switch Console later and verify native identity, addressing, and original-reporter confirmation before allowing real traffic.
+Slack is explicitly deferred. Install its bridge through Switch Console later and verify native identity, addressing, and original-reporter confirmation before allowing real traffic.
 
 ## Shut down
 

@@ -2299,6 +2299,19 @@ textarea {
   padding: 16px 0;
   border-top: 2px dashed var(--line);
 }
+.screenshot-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+.screenshot-row img {
+  display: block;
+  max-width: 220px;
+  max-height: 160px;
+  border: 2px solid var(--soft-line);
+  border-radius: 8px;
+}
 .search-input kbd {
   display: none;
 }
