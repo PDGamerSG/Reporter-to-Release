@@ -128,7 +128,7 @@ npm run start -- --port 3107
 npm run test:e2e
 ```
 
-The verified implementation passes 64 TypeScript tests, 7 worker tests, and 16 browser scenarios. [CI](.github/workflows/ci.yml) runs checks, audit, build, and browser acceptance on main pushes and PRs using isolated configuration. The [test plan](docs/testing/test-plan.md) separates live acceptance evidence from simulations.
+The verified implementation passes 66 TypeScript tests, 7 worker tests, and 16 browser scenarios. [CI](.github/workflows/ci.yml) runs checks, audit, build, and browser acceptance on main pushes and PRs using isolated configuration. The [test plan](docs/testing/test-plan.md) separates live acceptance evidence from simulations.
 
 To run the seeded failing-to-passing example:
 

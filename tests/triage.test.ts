@@ -205,6 +205,32 @@ describe("spending guard", () => {
     vi.restoreAllMocks();
   });
 
+  it("counts a timeout as worst-case spend, since it may be billed", async () => {
+    await expect(
+      runTriage(store, dossier, "a", (async () => {
+        throw new DOMException("timed out", "TimeoutError");
+      }) as typeof fetch),
+    ).rejects.toThrow("unavailable");
+    const usage = (await store.read("ai:usage")).ledger.aiUsage;
+    expect(usage?.spentMicros).toBe(RESERVATION_MICROS);
+    expect(usage?.reservations).toHaveLength(0);
+  });
+
+  it("charges nothing when the provider refuses the call", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    await expect(
+      runTriage(
+        store,
+        dossier,
+        "a",
+        (async () => new Response("", { status: 429 })) as typeof fetch,
+      ),
+    ).rejects.toThrow("unavailable");
+    const usage = (await store.read("ai:usage")).ledger.aiUsage;
+    expect(usage?.spentMicros).toBe(0);
+    vi.restoreAllMocks();
+  });
+
   it("charges the budget when billed output is unusable", async () => {
     await expect(
       runTriage(store, dossier, "a", (async () =>
