@@ -50,4 +50,16 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --project worker --extra test --frozen
       - run: uv run --project worker pytest -c worker/pyproject.toml worker/tests -q
-      - run: uv run --project worker ruff check worker/src/r2r_worker worker/tests
+      - run: uv run --project worker ruff check worker/src/r2r_worker worker/src/r2r_engineering worker/tests
+  sandbox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --project worker --extra test --frozen
+      - run: docker build -f infra/engineering-sandbox.Dockerfile -t r2r-regression:current .
+      - name: Prove generated-code isolation and measured assertions
+        run: uv run --project worker pytest -c worker/pyproject.toml worker/tests/test_sandbox_integration.py -q
+        env:
+          R2R_SANDBOX_TESTS: "1"
