@@ -66,6 +66,35 @@ export interface Fix {
   mergeSha?: string;
   mergedBy?: string;
 }
+export interface Triage {
+  summary: string;
+  severity: Severity;
+  severityReason: string;
+  component: Component;
+  likelyCause: string;
+  reproductionSteps: string[];
+  regressionTest: string;
+  missingInformation: string[];
+  reporterMessage: string;
+  confidence: "low" | "medium" | "high";
+  model: string;
+  createdAt: string;
+  usage: {
+    inputTokens: number;
+    cachedTokens: number;
+    outputTokens: number;
+    costMicros: number;
+  };
+}
+export interface AiUsage {
+  spentMicros: number;
+  calls: number;
+  inputTokens: number;
+  cachedTokens: number;
+  outputTokens: number;
+  reservations: { id: string; at: number; micros: number }[];
+  recent: { at: number; client: string }[];
+}
 export interface Cluster {
   id: string;
   title: string;
@@ -79,6 +108,7 @@ export interface Cluster {
   assignee: string;
   labels: string[];
   githubIssue?: { number: number; url: string };
+  triage?: Triage;
   reproduction?: Reproduction;
   reporterConfirmedAt?: string;
   fix?: Fix;
@@ -125,6 +155,7 @@ export interface Ledger {
   deliveries: Record<string, string>;
   createdAt: string;
   workerHeartbeat?: { at: string; roomsConnected: number; version: string };
+  aiUsage?: AiUsage;
   githubLastEventAt?: string;
   productionDeployments?: {
     sha: string;

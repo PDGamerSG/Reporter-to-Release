@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { AuditEvent } from "@/lib/domain/types";
 import type { ReporterCluster } from "@/lib/presentation";
+import { FieldNotes } from "./field-notes";
 import { PublicHeader } from "./public-header";
 import { Journey, StateBadge, niceDate } from "./ui";
 type Tracking = {
@@ -273,6 +274,12 @@ export function Tracker({ reportId }: { reportId: string }) {
                 Check for updates
               </button>
             </div>
+          </section>
+        )}
+        {data?.cluster.triage && (
+          <section className="public-card" aria-label="AI field notes">
+            <h2>{data.cluster.triage.summary}</h2>
+            <FieldNotes triage={data.cluster.triage} />
           </section>
         )}
         <p className="public-footer">
