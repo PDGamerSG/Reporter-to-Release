@@ -2,7 +2,7 @@
 
 ## Report a bug
 
-Open [the web form](https://reporter-to-release.pallabdas.me/report). Describe what went wrong, how to repeat it, the expected result, and the browser or device involved. Submit observed behavior without passwords, customer details, or instructions for agents.
+Open [the home page](https://reporter-to-release.pallabdas.me/). Describe what went wrong, how to repeat it, the expected result, and the browser or device involved. Submit observed behavior without passwords, customer details, or instructions for agents. In about 10 seconds the page shows AI field notes: a suggested severity, a likely cause, steps to reproduce, and the test that would prove the bug. A person makes the final decisions. If triage fails, the report is still saved and the page offers a retry. Sample reports stay out of the live desk.
 
 Keep the **Track your report** link shown after submission. Its URL fragment contains a private capability. Anyone holding the complete link can read that report and answer its confirmation questions. The application cannot recover a lost token from its stored hash.
 
@@ -10,14 +10,14 @@ The tracker shows receipt, reproduction evidence, review, deployment, and report
 
 Instruction-bearing reports are held in the Airlock. Their raw text is discarded. An owner must obtain clean facts before releasing the report to engineering. Detection is heuristic and does not guarantee removal of all sensitive data.
 
-Sources: [form](../src/components/report-form.tsx), [tracker](../src/components/tracker.tsx), [workflow](../src/lib/domain/workflow.ts).
+Sources: [page](../src/components/bug-desk.tsx), [tracker](../src/components/tracker.tsx), [workflow](../src/lib/domain/workflow.ts).
 
 ## Explore the demo
 
-The [home page](https://reporter-to-release.pallabdas.me/) opens an isolated, seeded demo for each visitor. The purple demo notice identifies synthetic reports, agents, and releases. Searches, filters, dossier dialogs, reset, and example lifecycle buttons operate within that private workspace.
+The [bug desk](https://reporter-to-release.pallabdas.me/desk) opens an isolated, seeded demo for each visitor. The purple demo notice identifies synthetic reports, agents, and releases. Searches, filters, dossier dialogs, reset, and example lifecycle buttons operate within that private workspace.
 
 1. Open a bug from the inbox and inspect its dossier, evidence, activity, and reporters.
-2. Submit a new report from the demo or use `/report?mode=demo`.
+2. Submit a new report from the demo or use `/?mode=demo`.
 3. Follow its example controls from reproduction to reporter confirmation, fix, human review, merge, production deployment, and final verification.
 4. Use **Reset demo** in the workflow guide to restore the examples.
 

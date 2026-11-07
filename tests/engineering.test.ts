@@ -65,6 +65,35 @@ it("separates engineering and concierge authority", async () => {
   );
   expect(response.status).toBe(401);
 });
+
+it("pages actionable work so earlier reviewed or blocked bugs cannot starve new reports", async () => {
+  const report = await seed();
+  await mutate(store, "live", (ledger) => {
+    const template = ledger.clusters[report.clusterId];
+    ledger.clusters = Object.fromEntries(
+      Array.from({ length: 201 }, (_, i) => {
+        const id = `R2R-${String(i + 1).padStart(4, "0")}`;
+        return [
+          id,
+          { ...template, id, state: i < 100 ? "review" : "reproducing" },
+        ];
+      }),
+    );
+  });
+  const first = await (await call("work")).json();
+  expect(first.clusters[0].id).toBe("R2R-0101");
+  expect(first.nextCursor).toBe("R2R-0200");
+  const next = await handleApi(
+    new Request("https://desk.example/api/engineering/work?after=R2R-0200", {
+      headers: { authorization: "Bearer engineering-test-token" },
+    }),
+    ["engineering", "work"],
+    store,
+  );
+  expect((await next.json()).clusters.map((c: { id: string }) => c.id)).toEqual(
+    ["R2R-0201"],
+  );
+});
 it("keeps reporter confirmation and human release authority outside the runtime", async () => {
   const report = await seed();
   const path = `bugs/${report.clusterId}/actions`;

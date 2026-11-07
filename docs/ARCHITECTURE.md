@@ -59,7 +59,9 @@ sequenceDiagram
   API-->>Reporter: Authorized status and evidence
 ```
 
-Sources: [ReportForm](../src/components/report-form.tsx), [API](../src/lib/api.ts), [airlock](../src/lib/domain/airlock.ts), [outbox](../src/lib/domain/outbox.ts), [worker](../worker/src/r2r_worker/main.py). Quarantined input produces no engineering dossier job. Web updates are read on the private tracking page; there is no email or browser push delivery.
+After intake, the reporter's browser requests AI triage with its private capability. The [proxy](../src/lib/ai/triage.ts) reserves budget, sends the sanitized dossier to the Meta Model API behind a frozen cached prompt prefix, validates the result, and stores it on the cluster. It is advisory and cannot change state. A live issue receives it in its body or as a comment.
+
+Sources: [BugDesk](../src/components/bug-desk.tsx), [API](../src/lib/api.ts), [airlock](../src/lib/domain/airlock.ts), [outbox](../src/lib/domain/outbox.ts), [worker](../worker/src/r2r_worker/main.py). Quarantined input produces no engineering dossier job. Web updates are read on the private tracking page; there is no email or browser push delivery.
 
 ## Lifecycle and authority
 

@@ -17,6 +17,19 @@ Run `npm run setup` after `npm ci`. It creates a private `.env.local` from [.env
 | `OWNER_GITHUB_LOGINS`     | `PDGamerSG`                                          | [Relay](../src/lib/integrations/github.ts): comma-separated human GitHub reviewers allowed to approve. Chat handles and organization names are not verified human logins.                                                      |
 | `CODEOWNER_GITHUB_LOGINS` | `PDGamerSG`                                          | [Relay](../src/lib/integrations/github.ts): subset counted as code owners by the ledger. Keep consistent with [.github/CODEOWNERS](../.github/CODEOWNERS).                                                                     |
 
+### AI triage
+
+| Variable                  | Required / default       | Consumer and purpose                                                                                                                                                        |
+| ------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODEL_API_KEY`           | Empty disables triage    | [Proxy](../src/lib/ai/triage.ts): Meta Model API key. Server-only: never prefix it with `NEXT_PUBLIC_`. Reports still work without it; the page says triage is unavailable. |
+| `MODEL_ID`                | `muse-spark-1.3`         | [Proxy](../src/lib/ai/triage.ts): model. Contributor models are refused because their terms allow training on prompts.                                                      |
+| `MODEL_API_BASE_URL`      | `https://api.meta.ai/v1` | [Proxy](../src/lib/ai/triage.ts): API origin.                                                                                                                               |
+| `LLM_BUDGET_USD`          | `5`                      | [Proxy](../src/lib/ai/triage.ts): total spend cap across all time, held in the ledger. Raising it is the only way to resume after the cap is reached.                       |
+| `LLM_HOURLY_LIMIT`        | `60`                     | [Proxy](../src/lib/ai/triage.ts): model calls per hour across all visitors.                                                                                                 |
+| `LLM_CLIENT_HOURLY_LIMIT` | `10`                     | [Proxy](../src/lib/ai/triage.ts): model calls per hour for one client address.                                                                                              |
+
+The cap counts this application's calls, priced from the provider's published rates. It cannot read the account's credit balance or stop a payment method from being charged, so confirm the remaining credit in the Model API dashboard before raising it. The signed-in owner can read recorded spend at `GET /api/ai/usage`.
+
 Set production variables in Vercel, then redeploy: an environment change does not update an existing deployment. Run `npm run db:init` once with the production database configuration before serving traffic. The migration is idempotent.
 
 The current owner list has one verified human. Add a second authorized human GitHub login before attempting a sensitive-path merge. Do not weaken the two-human rule to make a demonstration pass. Configure matching GitHub branch protection separately; a ledger gate does not itself prevent a repository administrator from bypassing GitHub controls.
