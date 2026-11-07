@@ -155,6 +155,13 @@ export interface Ledger {
   deliveries: Record<string, string>;
   createdAt: string;
   workerHeartbeat?: { at: string; roomsConnected: number; version: string };
+  engineeringHeartbeat?: {
+    at: string;
+    roomsConnected: number;
+    provider: "meta" | "bedrock";
+    model: string;
+    version: string;
+  };
   aiUsage?: AiUsage;
   githubLastEventAt?: string;
   productionDeployments?: {

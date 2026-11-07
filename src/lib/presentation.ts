@@ -57,8 +57,22 @@ export function presentWorkspace(ledger: Ledger, mode: "demo" | "live") {
     ledger.workerHeartbeat &&
     Date.now() - Date.parse(ledger.workerHeartbeat.at) < 90000 &&
     ledger.workerHeartbeat.roomsConnected >= 2;
+  const heartbeat = mode === "live" ? ledger.engineeringHeartbeat : undefined;
+  const heartbeatAge = heartbeat ? Date.now() - Date.parse(heartbeat.at) : NaN;
+  const fresh = heartbeatAge >= 0 && heartbeatAge < 90000;
+  const engineering = heartbeat
+    ? {
+        connected: fresh && heartbeat.roomsConnected === 4,
+        fresh,
+        roomsConnected: fresh ? heartbeat.roomsConnected : 0,
+        provider: heartbeat.provider,
+        model: heartbeat.model,
+        lastSeenAt: heartbeat.at,
+      }
+    : null;
   return {
     mode,
+    engineering,
     revision: ledger.revision,
     clusters: Object.values(ledger.clusters).map((cluster) =>
       cluster.triage
@@ -93,6 +107,22 @@ export function presentWorkspace(ledger: Ledger, mode: "demo" | "live") {
         detail: connected
           ? "Public and engineering rooms connected"
           : "Waiting for the AWS worker and room connections",
+      },
+      {
+        id: "engineering",
+        name: "AWS engineering service",
+        status:
+          mode === "demo"
+            ? "demo"
+            : engineering?.connected
+              ? "connected"
+              : "disconnected",
+        detail:
+          mode === "demo"
+            ? "Example roles only; live service status is hidden in the demo"
+            : engineering?.fresh
+              ? `${engineering.roomsConnected} of 4 role connections; ${engineering.provider === "meta" ? "Meta" : "Amazon Bedrock"} / ${engineering.model}. Model outcomes appear in each bug's audit trail.`
+              : "Waiting for a fresh engineering heartbeat from AWS",
       },
       {
         id: "github",

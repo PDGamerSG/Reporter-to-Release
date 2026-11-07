@@ -78,11 +78,14 @@ These use the separate `Authorization: Bearer ENGINEERING_TOKEN`. The concierge 
 
 | Method and path                             | Behavior                                                                                                                                                       |
 | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /api/engineering/heartbeat`           | Records provider, model, version and 0–4 connected role rooms. The server supplies the timestamp; unknown fields are rejected.                                 |
 | `GET /api/engineering/work?after=:bugId`    | Up to 100 actionable sanitized clusters in ID order, with `nextCursor` for the next page. Includes reproduction and confirmation status needed to resume work. |
 | `POST /api/engineering/bugs/:bugId/actions` | Only `start_reproduction`, `propose_reproduction`, `start_fix`, and `submit_fix`. Existing lifecycle guards still apply.                                       |
 | `POST /api/engineering/bugs/:bugId/notes`   | A bounded operational audit note, with JSON `{ "summary": "..." }`.                                                                                            |
 
 Engineering cannot answer a reporter, approve or merge a fix, record a deployment, release quarantine, or claim concierge deliveries. Sources: [engineering dispatcher](../../src/lib/engineering.ts), [boundary tests](../../tests/engineering.test.ts).
+
+The authenticated workspace marks engineering connected only while its last heartbeat is less than 90 seconds old and all four role connections are open. This measures service and room liveness; model calls may still fail or reach their budget, with outcomes recorded on each bug. Demonstration workspaces do not expose live engineering metadata.
 
 ## GitHub webhook
 

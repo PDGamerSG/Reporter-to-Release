@@ -66,6 +66,50 @@ it("separates engineering and concierge authority", async () => {
   expect(response.status).toBe(401);
 });
 
+it("records engineering liveness with a server timestamp and separate service authority", async () => {
+  const heartbeat = {
+    roomsConnected: 4,
+    provider: "meta",
+    model: "muse-spark-1.3",
+    version: "1.1.0",
+  };
+  expect(
+    (await call("heartbeat", heartbeat, "concierge-test-token")).status,
+  ).toBe(401);
+  expect((await store.read("live")).version).toBe(0);
+  const before = Date.now();
+  expect((await call("heartbeat", heartbeat)).status).toBe(200);
+  const recorded = (await store.read("live")).ledger.engineeringHeartbeat;
+  expect(recorded).toMatchObject(heartbeat);
+  expect(Date.parse(recorded!.at)).toBeGreaterThanOrEqual(before);
+  expect(Date.parse(recorded!.at)).toBeLessThanOrEqual(Date.now());
+});
+
+it("rejects invalid or extra heartbeat data without changing the ledger", async () => {
+  const heartbeat = {
+    roomsConnected: 4,
+    provider: "meta",
+    model: "muse-spark-1.3",
+    version: "1.1.0",
+  };
+  for (const invalid of [
+    { roomsConnected: 5 },
+    { roomsConnected: -1 },
+    { roomsConnected: 2.5 },
+    { provider: "unknown" },
+    { model: "" },
+    { model: "https://provider.example/?key=private" },
+    { version: "x".repeat(41) },
+    { at: "2099-01-01T00:00:00.000Z" },
+    { token: "private-provider-key" },
+  ]) {
+    expect((await call("heartbeat", { ...heartbeat, ...invalid })).status).toBe(
+      400,
+    );
+  }
+  expect((await store.read("live")).version).toBe(0);
+});
+
 it("pages actionable work so earlier reviewed or blocked bugs cannot starve new reports", async () => {
   const report = await seed();
   await mutate(store, "live", (ledger) => {

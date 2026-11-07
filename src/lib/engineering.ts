@@ -22,6 +22,28 @@ export async function engineeringApi(
     request.headers.get("authorization")?.replace(/^Bearer /, "") ?? "";
   if (!constantEqual(token, process.env.ENGINEERING_TOKEN ?? ""))
     throw new DomainError("Valid engineering credentials are required.", 401);
+  if (
+    request.method === "POST" &&
+    parts.join("/") === "engineering/heartbeat"
+  ) {
+    const input = z
+      .object({
+        roomsConnected: z.number().int().min(0).max(4),
+        provider: z.enum(["meta", "bedrock"]),
+        model: z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9._:/-]{0,119}$/),
+        version: z
+          .string()
+          .min(1)
+          .max(40)
+          .regex(/^[a-zA-Z0-9._-]+$/),
+      })
+      .strict()
+      .parse(await readJson(request));
+    await mutate(store, "live", (ledger) => {
+      ledger.engineeringHeartbeat = { ...input, at: new Date().toISOString() };
+    });
+    return json({ ok: true });
+  }
   if (request.method === "GET" && parts.join("/") === "engineering/work") {
     const { ledger } = await store.read("live");
     const after = new URL(request.url).searchParams.get("after") ?? "";
