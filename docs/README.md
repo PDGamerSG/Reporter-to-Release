@@ -11,6 +11,7 @@ Reporter-to-Release is Team Vulcan's web-first bug desk. The public site is [rep
 - [Production recorder](operations/production-recorder.md): exact-revision Vercel verification and signed GitHub release evidence.
 - [Threat model](security/threat-model.md): protected assets, authority checks, and remaining risks.
 - [Test plan](testing/test-plan.md): automated coverage and the distinction between simulated and live evidence.
+- [Controlled release evidence](evidence/2026-11-07-controlled-release.json): owner-approved PR #4, verified production and original controlled-reporter confirmation.
 - [Design](DESIGN.md): visual tokens, responsive layouts, and accessibility.
 - [Troubleshooting](TROUBLESHOOTING.md): common setup and delivery failures.
 - [Event contribution and provenance](EVENT_CONTRIBUTION.md): new implementation, reused research, and actual commit history.

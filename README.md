@@ -18,9 +18,9 @@ Reporter-to-Release gives people a way to report a bug and stay involved until i
 
 This repository contains the web app, guarded workflow API, durable ledger, Switch concierge, isolated AWS engineering service, production recorder, tests, and documentation. Web intake, AI triage, model-generated ShopLite regressions and draft fixes are live. Telegram and Slack are deferred. The home page lets a person describe a bug and read advisory triage beside it; `/desk` opens the operator workspace with a labeled isolated demo.
 
-The original one-page frontend branch is merged into `main`, including its original commits. The live workspace now reads the AWS engineering service's actual provider and room connections. Stale or partial connections cannot appear healthy, and the demo keeps its model roles illustrative. [Combined release evidence](docs/evidence/2026-11-07-combined-release.json) records the merge, checks and deployment.
+The one-page frontend is integrated into `main`. The live workspace reads the AWS engineering service's actual provider and room connections. Stale or partial connections cannot appear healthy, and the demo keeps its model roles illustrative. [Combined release evidence](docs/evidence/2026-11-07-combined-release.json) records the original frontend merge, checks and deployment; [completion evidence](docs/evidence/2026-11-07-controlled-release.json) also notes a later published-history rewrite with an unchanged source tree.
 
-The controlled backend acceptance produced a real failing regression, original-reporter confirmation and [fix PR #4](https://github.com/PDGamerSG/Reporter-to-Release/pull/4), with 113 passing tests and all CI jobs green. PR #4 was merged on November 7. This is a controlled test of the live backend. Reporter-confirmed production resolution remains required. [The evidence record](docs/evidence/2026-11-07-backend-acceptance.json) contains actual revisions and measured output.
+The controlled backend acceptance completed the live loop through [fix PR #4](https://github.com/PDGamerSG/Reporter-to-Release/pull/4). The owner approved exact head `496f9aa`, merge `d81ba99` passed all CI jobs, and the production recorder verified that release on the custom domain. After checking the overflow regression against that exact source, the original controlled reporter confirmed the release. This is a controlled acceptance test. [Completion evidence](docs/evidence/2026-11-07-controlled-release.json) records approval, merge, deployment and confirmation; [earlier backend evidence](docs/evidence/2026-11-07-backend-acceptance.json) preserves the measured failing and passing output. Recorded commit IDs map to current commits in [the commit ID map](docs/evidence/commit-id-map.md).
 
 Built for Flip the Switch, November 4–7, 2026. This repository's implementation began November 7. The concept and generic Switch client come from earlier research; [the contribution record](docs/EVENT_CONTRIBUTION.md) identifies that baseline and the new work without counting earlier benchmarks as event validation.
 
@@ -128,7 +128,7 @@ uv run --project worker pytest -c worker/pyproject.toml worker/tests -q
 uv run --project worker ruff check worker/src/r2r_worker worker/src/r2r_engineering worker/tests
 ```
 
-For the 16 browser scenarios, install Chromium, start the built app on port 3107 in another terminal, and run Playwright:
+For the 18 browser scenarios, install Chromium, start the built app on port 3107 in another terminal, and run Playwright:
 
 ```bash
 npx playwright install chromium
@@ -137,7 +137,7 @@ npm run start -- --port 3107
 npm run test:e2e
 ```
 
-The combined application passed 128 TypeScript tests, 21 Python unit tests and 18 browser scenarios. CI also runs three actual Docker integration tests, formatting, lint, types, dependency audit and production build. The controlled draft fix passed 113 TypeScript tests on its own earlier base. The [test plan](docs/testing/test-plan.md) separates live acceptance evidence from simulations and explains how to run the Docker checks.
+The approved merged application passed 124 TypeScript tests, 21 Python unit tests, three actual Docker integration tests and 18 browser scenarios, plus formatting, lint, types, dependency audit and production build. The controlled draft fix passed 113 TypeScript tests on its own earlier base. The [test plan](docs/testing/test-plan.md) separates live acceptance evidence from simulations and explains how to run the Docker checks.
 
 To run the seeded failing-to-passing example:
 
@@ -187,6 +187,7 @@ Configure production secrets, initialize the ledger with `npm run db:init`, depl
 - [Design](docs/DESIGN.md): interface tokens, responsiveness, and accessibility.
 - [Troubleshooting](docs/TROUBLESHOOTING.md): common setup and delivery failures.
 - [Event contribution](docs/EVENT_CONTRIBUTION.md): earlier research, new work, and actual timestamps.
+- [Controlled release evidence](docs/evidence/2026-11-07-controlled-release.json): exact approval, signed merge/deployment events and original-reporter confirmation.
 
 ## Known limits
 
@@ -197,7 +198,7 @@ Configure production secrets, initialize the ledger with `npm run db:init`, depl
 - Redaction and instruction detection are heuristic. Voice reports and screenshot uploads are not supported by the web form.
 - The AWS service executes and measures its tests in isolated containers. The ledger still trusts authorized evidence submissions; it does not independently attest every command or derive changed paths from GitHub. Human review remains required.
 - Owner access uses a shared key. Sensitive approval gates require verified GitHub identities; a second authorized human must be configured for those fixes.
-- The complete release/reopen sequence is proven in isolated tests and the labeled demo. Live controlled acceptance additionally proves model-generated reproduction and draft fix, reporter gating, CI and automatic production recording. PR #4 was merged on November 7; no released customer resolution is claimed.
+- Live controlled acceptance proves model-generated reproduction and fix, reporter gating, explicit owner approval, merge, verified production recording and original-reporter confirmation. Its overflow check executes the calculation module from the verified production revision; the web checkout uses a fixed price. Reopening is proven in isolated tests and the labeled demo. No released customer resolution is claimed.
 - Production recording depends on trusted-main CI, Vercel API access and the signed GitHub webhook. A failed check, wrong alias or unhealthy release is left unrecorded. [Operations](docs/operations/production-recorder.md) describes recovery.
 - One JSON ledger per workspace and one AWS host limit scale and availability. Delivery can repeat across a crash at an external-send boundary; backup/restore operations remain the owner's responsibility.
 
