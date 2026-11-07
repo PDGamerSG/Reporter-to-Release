@@ -2,6 +2,7 @@
   "name": "reporter-to-release",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "A public bug desk that follows every report through proof, review, deployment and reporter confirmation.",
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
