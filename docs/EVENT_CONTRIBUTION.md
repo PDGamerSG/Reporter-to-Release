@@ -51,7 +51,7 @@ These are the original commit IDs and actual repository commit timestamps in UTC
 | `73cb2ec` | 15:05:42              | Restricted engineering heartbeat API and measured connection freshness contract.           |
 | `4476dfc` | 15:16:05              | Live AWS heartbeat publishing, accurate frontend crew/connections, and browser acceptance. |
 | `28113c1` | 15:26:51              | Combined release documentation, measured evidence and original frontend screenshots.       |
-| `3970b80` | 15:37:39              | Owner-approved PR #4 merge, preserving the exact reviewed head and tested combined tree.   |
+| `98298f7` | 15:37:39              | Owner-approved PR #4 merge, preserving the exact reviewed head and tested combined tree.   |
 
 Commit IDs in this table are the current history. [The commit ID map](evidence/commit-id-map.md) links them to the IDs recorded in earlier evidence.
 
