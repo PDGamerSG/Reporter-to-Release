@@ -11,7 +11,7 @@
 - Preserve concurrent frontend and AI-triage edits.
 - Use AWS role credentials for Bedrock, a separate engineering bearer, and no repository credential in the concierge.
 - Restrict generated changes to `src/lib/shoplite.ts` and the bug's regression test.
-- Require reporter confirmation before fixing; publish draft PRs without human approvals or merges.
+- Require reporter confirmation before fixing. The engineering service publishes draft PRs and cannot approve or merge them; an operator may act on the owner's explicit instructions outside that runtime.
 - Keep real commits at least ten minutes apart; document actual provenance and validation.
 
 ## Tasks
@@ -25,4 +25,6 @@
 
 ## Verified outcome
 
-AWS handoffs, isolated reproduction and fix execution, original acceptance reporter confirmation, and draft PR #4 are live. PR head `496f9aa` passed all CI jobs and 113 TypeScript tests. The automatic recorder verified main checkpoint `db5c014` and delivered its actual signed production webhook with HTTP 200. See [acceptance evidence](../../evidence/2026-11-07-backend-acceptance.json). The deployed provider is explicitly Meta because real Bedrock requests hit account quota; the AWS role adapter remains optional. Human approval and merge are still required.
+AWS handoffs, isolated reproduction and fix execution, original acceptance reporter confirmation, and draft PR #4 were verified at the backend checkpoint. PR head `496f9aa` passed all CI jobs and 113 TypeScript tests on its original base. The automatic recorder verified main checkpoint `db5c014` and delivered its actual signed production webhook with HTTP 200. See [acceptance evidence](../../evidence/2026-11-07-backend-acceptance.json). The deployed provider is explicitly Meta because real Bedrock requests hit account quota; the AWS role adapter remains optional.
+
+The owner later explicitly approved the exact PR head and requested its merge. Merge `d81ba99` passed combined CI with 124 TypeScript tests, 21 Python unit tests, three Docker integration tests and 18 browser scenarios, then reached verified production. The original controlled acceptance runner checked the calculation module at that revision and confirmed release through its original reporter capability at 15:45:13 UTC. The live report is `verified`; the engineering service itself still cannot approve or merge. See [controlled release completion](../../evidence/2026-11-07-controlled-release.json).
