@@ -21,6 +21,13 @@ Browser writes require `Content-Type: application/json` and an `Origin` matching
 | `POST /api/bugs/:bugId/demo-step` | Demo session, same origin          | Advances one explicitly simulated lifecycle step. Forbidden in live mode.                                                                                              |
 | `GET /api/export`                 | Workspace session                  | Downloads the current authorized workspace as JSON.                                                                                                                    |
 
+| Endpoint                           | Caller                                 | Behavior                                                                                                                                          |
+| ---------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /api/track/:reportId/triage` | Report capability (`x-reporter-token`) | Returns advisory AI triage, once per bug. Later calls return the stored result with `reused: true` at no cost. Add `?mode=demo` for demo reports. |
+| `GET /api/ai/usage`                | Live owner                             | Returns recorded model spend, the cap, and token totals, including cached tokens.                                                                 |
+
+Triage returns 409 for a quarantined report, 429 at an hourly limit, and 503 when the model is unavailable, unconfigured, or the spending cap is reached. In each case the report stays saved. Billing figures never reach the reporter.
+
 An owner browser may also use `POST /api/reports` for its current live workspace. Public pages use `/api/intake` explicitly; the demo form always supplies `mode=demo` even when the browser has an owner cookie.
 
 ### Report shape

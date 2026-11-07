@@ -18,6 +18,15 @@ The desk accepts untrusted public text while engineering may have repository acc
 | Lost or duplicate state writes                   | Versioned Postgres compare-and-swap with retries; idempotent delivery keys; durable outbox leases.                                                                                              | [Store](../../src/lib/store/index.ts), [persistence tests](../../tests/persistence.test.ts)         |
 | Exposed host services                            | HTTPS proxy; loopback-bound database/API ports; AWS security group exposes only 80/443; SSM management. Non-root worker, read-only root filesystem, dropped capabilities.                       | [Host setup](../../scripts/setup-switch-host.sh), [compose](../../infra/worker.compose.yml)         |
 
+## AI triage
+
+- The key stays on the server. The browser calls the same-origin API, which needs the report's private capability.
+- The model receives only the sanitized dossier, labeled as untrusted data, after the per-request content. Quarantined reports are never sent.
+- Output is schema-checked, then filtered like reporter text, so links, mentions, and markup are removed. React renders it as text.
+- The result is advisory. It is stored apart from `severity` and `state`, and no code path turns it into a workflow command.
+- Requests set `store: false`, and Contributor models are refused, so reports are not offered for provider training.
+- Public abuse is bounded by one call per bug, per-client and global hourly limits, and a spending cap. Worst-case cost is held before each call, so parallel requests cannot exceed the cap. A hold abandoned by a crash counts as spent.
+
 ## Limits and trust assumptions
 
 - Redaction and instruction detection use deterministic patterns. They can miss novel encodings, sensitive context, and adversarial wording. They are not a complete data-loss prevention system or proof that model execution is safe.

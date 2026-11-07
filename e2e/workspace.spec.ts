@@ -5,7 +5,7 @@ test("queue search, evidence dialog, keyboard dismissal, and private demo isolat
   page,
   browser,
 }) => {
-  await page.goto("/");
+  await page.goto("/desk");
   await expect(
     page.getByText("Interactive demo", { exact: true }),
   ).toBeVisible();
@@ -46,7 +46,7 @@ test("queue search, evidence dialog, keyboard dismissal, and private demo isolat
 test("every workspace view and the public intake form render without accessibility violations", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/desk");
   await expect(
     page.getByRole("textbox", { name: "Search bug reports" }),
   ).toBeVisible();
@@ -75,7 +75,7 @@ test("every workspace view and the public intake form render without accessibili
       })),
     ).toEqual([]);
   }
-  await page.goto("/report?mode=demo");
+  await page.goto("/?mode=demo");
   const result = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();
@@ -90,18 +90,23 @@ test("every workspace view and the public intake form render without accessibili
 test("a demo report progresses through every guard to reporter verification", async ({
   page,
 }) => {
-  await page.goto("/report?mode=demo");
+  await page.route("**/triage*", (route) =>
+    route.fulfill({
+      status: 503,
+      json: { error: "AI triage is unavailable." },
+    }),
+  );
+  await page.goto("/?mode=demo");
   const title = "Receipt preview turns blank";
-  await page.getByLabel("What went wrong?").fill(title);
   await page
-    .getByLabel("Walk us through it")
-    .fill("Open the receipt preview after checkout. The receipt is blank.");
-  await page.getByRole("button", { name: "Submit demo report" }).click();
+    .getByLabel("What happened?")
+    .fill(`${title}. Open the receipt preview after checkout.`);
+  await page.getByRole("button", { name: "Send report" }).click();
   const tracking = await page
-    .getByRole("link", { name: "Track your report" })
+    .getByRole("link", { name: "Open tracking page" })
     .getAttribute("href");
   expect(tracking).toContain("#");
-  await page.goto("/");
+  await page.goto("/desk");
   await page.getByRole("button", { name: new RegExp(title) }).click();
   const dialog = page.getByRole("dialog");
   for (const name of [
@@ -155,7 +160,7 @@ for (const [name, width, height] of [
     page,
   }) => {
     await page.setViewportSize({ width, height });
-    await page.goto("/");
+    await page.goto("/desk");
     await expect(
       page.getByRole("textbox", { name: "Search bug reports" }),
     ).toBeVisible();
