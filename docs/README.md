@@ -15,6 +15,7 @@ Reporter-to-Release is Team Vulcan's web-first bug desk. The public site is [rep
 - [Design](DESIGN.md): visual tokens, responsive layouts, and accessibility.
 - [Troubleshooting](TROUBLESHOOTING.md): common setup and delivery failures.
 - [Event contribution and provenance](EVENT_CONTRIBUTION.md): new implementation, reused research, and actual commit history.
+- [Commit ID map](evidence/commit-id-map.md): earlier evidence IDs and their current commits.
 - [Glossary](glossary.md): terms used by the desk.
 - [Build plan](BUILD_PLAN.md): the implementation plan recorded at the start of this repository.
 

@@ -20,7 +20,7 @@ This repository contains the web app, guarded workflow API, durable ledger, Swit
 
 The one-page frontend is integrated into `main`. The live workspace reads the AWS engineering service's actual provider and room connections. Stale or partial connections cannot appear healthy, and the demo keeps its model roles illustrative. [Combined release evidence](docs/evidence/2026-11-07-combined-release.json) records the original frontend merge, checks and deployment; [completion evidence](docs/evidence/2026-11-07-controlled-release.json) also notes a later published-history rewrite with an unchanged source tree.
 
-The controlled backend acceptance completed the live loop through [fix PR #4](https://github.com/PDGamerSG/Reporter-to-Release/pull/4). The owner approved exact head `496f9aa`, merge `d81ba99` passed all CI jobs, and the production recorder verified that release on the custom domain. After checking the overflow regression against that exact source, the original controlled reporter confirmed the release. This is a controlled acceptance test. [Completion evidence](docs/evidence/2026-11-07-controlled-release.json) records approval, merge, deployment and confirmation; [earlier backend evidence](docs/evidence/2026-11-07-backend-acceptance.json) preserves the measured failing and passing output.
+The controlled backend acceptance completed the live loop through [fix PR #4](https://github.com/PDGamerSG/Reporter-to-Release/pull/4). The owner approved exact head `496f9aa`, merge `d81ba99` passed all CI jobs, and the production recorder verified that release on the custom domain. After checking the overflow regression against that exact source, the original controlled reporter confirmed the release. This is a controlled acceptance test. [Completion evidence](docs/evidence/2026-11-07-controlled-release.json) records approval, merge, deployment and confirmation; [earlier backend evidence](docs/evidence/2026-11-07-backend-acceptance.json) preserves the measured failing and passing output. Recorded commit IDs map to current commits in [the commit ID map](docs/evidence/commit-id-map.md).
 
 Built for Flip the Switch, November 4–7, 2026. This repository's implementation began November 7. The concept and generic Switch client come from earlier research; [the contribution record](docs/EVENT_CONTRIBUTION.md) identifies that baseline and the new work without counting earlier benchmarks as event validation.
 
@@ -64,7 +64,7 @@ The API checks authority and lifecycle prerequisites on every write. The concier
 
 ## Screenshots
 
-Captured on November 7, 2026 from the local production build of combined release `ed3c80e`, in Chromium at 1440 × 900, light theme, with reduced motion. Dashboard and dossier images show the labeled demo. The one-page report form has a sample selected without submitting it. ShopLite is the seeded test app. The production hostname and exact immutable release were checked separately in the linked release evidence.
+Captured on November 7, 2026 from the local production build of combined release `4476dfc`, in Chromium at 1440 × 900, light theme, with reduced motion. Dashboard and dossier images show the labeled demo. The one-page report form has a sample selected without submitting it. ShopLite is the seeded test app. The production hostname and exact immutable release were checked separately in the linked release evidence.
 
 <p align="center">
   <img src="docs/images/evidence.png" width="860"
