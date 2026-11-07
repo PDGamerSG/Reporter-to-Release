@@ -305,7 +305,8 @@ export async function requestTriage(
       }),
     });
   } catch {
-    throw unavailable();
+    // A timeout or dropped connection says nothing about billing.
+    throw new TriageBilledError(unknownCost());
   }
   if (!response.ok) {
     console.warn(`AI triage request failed with status ${response.status}`);
@@ -314,7 +315,7 @@ export async function requestTriage(
   const parsed = responseShape.safeParse(
     await response.json().catch(() => ({})),
   );
-  if (!parsed.success) throw unavailable();
+  if (!parsed.success) throw new TriageBilledError(unknownCost());
   const body = parsed.data;
   const usage = {
     inputTokens: body.usage.input_tokens,
@@ -329,7 +330,7 @@ export async function requestTriage(
   try {
     result = modelOutput.parse(JSON.parse(text ?? ""));
   } catch {
-    throw new TriageOutputError(spent);
+    throw new TriageBilledError(spent);
   }
   // Model text is untrusted too: it passes the same filter as reporter text.
   return {
@@ -366,12 +367,19 @@ export function renderTriage(triage: Triage): string {
     .replace(/[`@<>]/g, "");
 }
 
-/** The provider billed the call, but its output was unusable. */
-export class TriageOutputError extends Error {
+/** The call was or may have been billed, and produced nothing usable. */
+export class TriageBilledError extends Error {
   constructor(readonly usage: Triage["usage"]) {
-    super("AI triage returned unusable output.");
+    super("AI triage produced no usable output.");
   }
 }
+/** Unknown spend counts as the worst case, so the cap errs towards stopping. */
+const unknownCost = (): Triage["usage"] => ({
+  inputTokens: 0,
+  cachedTokens: 0,
+  outputTokens: 0,
+  costMicros: RESERVATION_MICROS,
+});
 
 /** Reserves budget, calls the model, and records what the call really cost. */
 export async function runTriage(
@@ -387,7 +395,7 @@ export async function runTriage(
     await settleBudget(store, reservation, triage.usage);
     return triage;
   } catch (error) {
-    if (error instanceof TriageOutputError) {
+    if (error instanceof TriageBilledError) {
       await settleBudget(store, reservation, error.usage);
       throw unavailable();
     }
