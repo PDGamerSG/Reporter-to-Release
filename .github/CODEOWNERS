@@ -1,0 +1,8 @@
+* @PDGamerSG
+
+# Sensitive paths also require two distinct human approvals in the ledger.
+/src/lib/security.ts @PDGamerSG
+/src/lib/http.ts @PDGamerSG
+/src/lib/integrations/ @PDGamerSG
+/migrations/ @PDGamerSG
+/.github/ @PDGamerSG

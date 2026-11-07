@@ -3,6 +3,8 @@ node_modules/
 .vercel/
 .env*
 !.env.example
+worker.env
+switch-credentials.json
 .data/
 .venv/
 __pycache__/

@@ -1,0 +1,53 @@
+name: Verify application
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SESSION_SECRET: ci-session-secret-with-at-least-thirty-two-characters
+      ADMIN_TOKEN: ci-owner-key-for-isolated-tests
+      WORKER_TOKEN: ci-worker-key-for-isolated-tests
+      APP_URL: http://127.0.0.1:3107
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run check
+      - run: npm audit --audit-level=moderate
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Browser acceptance
+        run: |
+          npm run start -- --port 3107 > /tmp/r2r-server.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3107/api/health; then break; fi
+            sleep 1
+          done
+          npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-diagnostics
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+  worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --project worker --extra test --frozen
+      - run: uv run --project worker pytest -c worker/pyproject.toml worker/tests -q
+      - run: uv run --project worker ruff check worker/src/r2r_worker worker/tests

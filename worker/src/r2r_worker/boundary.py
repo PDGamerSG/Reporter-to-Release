@@ -1,8 +1,14 @@
 """Trust checks shared by the worker and its tests. No public commands execute."""
+
 import json
 import re
 
-AGENT_ACTIONS = {"start_reproduction", "propose_reproduction", "start_fix", "submit_fix"}
+AGENT_ACTIONS = {
+    "start_reproduction",
+    "propose_reproduction",
+    "start_fix",
+    "submit_fix",
+}
 
 
 def parse_engineering_command(body: str, sender: str | None, allowed: set[str]):
@@ -11,7 +17,10 @@ def parse_engineering_command(body: str, sender: str | None, allowed: set[str]):
     try:
         data = json.loads(body.strip()[5:])
         bug_id = data.pop("bugId")
-        if not re.fullmatch(r"R2R-\d{4,}", bug_id) or data.get("type") not in AGENT_ACTIONS:
+        if (
+            not re.fullmatch(r"R2R-\d{4,}", bug_id)
+            or data.get("type") not in AGENT_ACTIONS
+        ):
             return None
         return bug_id, data
     except (ValueError, KeyError, TypeError, AttributeError):

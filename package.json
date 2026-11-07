@@ -15,7 +15,10 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "check": "npm run typecheck && npm run lint && npm test",
-    "db:init": "node --env-file=.env.local --import tsx scripts/init-db.ts"
+    "db:init": "node --env-file=.env.local --import tsx scripts/init-db.ts",
+    "format": "prettier --write src tests e2e scripts/*.ts *.{ts,json,mjs}",
+    "format:check": "prettier --check src tests e2e scripts/*.ts *.{ts,json,mjs}",
+    "setup": "node --import tsx scripts/setup-env.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
@@ -26,15 +29,24 @@
     "zod": "^4.1.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.56.0",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.0.0",
+    "prettier": "^3.9.10",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",
     "vitest": "^4.0.0"
   },
-  "engines": { "node": ">=22" }
+  "engines": {
+    "node": ">=22"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    }
+  }
 }
