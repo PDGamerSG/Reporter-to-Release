@@ -36,7 +36,10 @@
       "subject": "feat: connect frontend crew status to the live AWS runtime"
     }
   ],
-  "checkpointIntervalsSeconds": [608, 623],
+  "checkpointIntervalsSeconds": [
+    608,
+    623
+  ],
   "historyPolicy": "Actual original authors and timestamps retained. No placeholder commits, backdating or rewritten history.",
   "validation": {
     "sourceSha": "ed3c80e30ed4915c77ea085db41b79e141a2b9e0",
@@ -250,5 +253,14 @@
         "sha256": "b276b7cdf781be9203b607e39926a7478d253bc5546b6a27f9d5c2e83eb57f44"
       }
     ]
+  },
+  "historicalSnapshot": true,
+  "asOf": "2026-11-07T15:18:46.609818+00:00",
+  "followUp": {
+    "evidence": "2026-11-07-controlled-release.json",
+    "state": "verified",
+    "mergeSha": "d81ba99745d9608e760c6c1555509e0679f883c5",
+    "note": "The controlledFix fields above describe the pre-approval snapshot and are retained as observed. The linked completion records subsequent explicit owner approval, merge, verified release and original controlled-reporter confirmation.",
+    "historyObservation": "The later published-history rewrite replaced original commit IDs without changing the source tree. Original ancestry fields above are historical observations; completion evidence records the replacement merge and fix parent."
   }
 }

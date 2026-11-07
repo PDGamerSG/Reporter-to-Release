@@ -1,0 +1,376 @@
+{
+  "date": "2026-11-07",
+  "recordedAt": "2026-11-07T15:47:31.508526+00:00",
+  "scope": "Completed controlled acceptance of the live reporter-to-release loop. This is not a customer incident or a claim of customer verification.",
+  "repository": "https://github.com/PDGamerSG/Reporter-to-Release",
+  "application": "https://reporter-to-release.pallabdas.me",
+  "clusterId": "R2R-0002",
+  "humanApproval": {
+    "headSha": "496f9aae9d7e66865517ef4b6bde21473f281834",
+    "at": "2026-11-07T15:33:48.589Z",
+    "actor": "Workspace owner",
+    "codeOwner": true,
+    "riskTier": 1,
+    "instruction": "Approve this exact fix and merge it.",
+    "recordingMethod": "Explicit owner session instruction recorded through the authenticated owner API. Advisory model review was not counted as human consent.",
+    "githubReviewCreated": false
+  },
+  "merge": {
+    "pr": "https://github.com/PDGamerSG/Reporter-to-Release/pull/4",
+    "approvedHead": "496f9aae9d7e66865517ef4b6bde21473f281834",
+    "sha": "d81ba99745d9608e760c6c1555509e0679f883c5",
+    "at": "2026-11-07T15:37:39+00:00",
+    "mergedBy": "PDGamerSG",
+    "tree": "6a991efb82145ba1dd8c81a0a943143b948c1e17",
+    "matchesLocallyTestedCandidate": true,
+    "signedWebhook": {
+      "id": "3852727107396321280",
+      "deliveredAt": "2026-11-07T15:37:44.511Z",
+      "statusCode": 200,
+      "event": "pull_request",
+      "action": "closed",
+      "headSha": "496f9aae9d7e66865517ef4b6bde21473f281834",
+      "mergeSha": "d81ba99745d9608e760c6c1555509e0679f883c5"
+    },
+    "approvedHeadIsAncestorAtOriginalMerge": true
+  },
+  "validation": {
+    "sourceSha": "d81ba99745d9608e760c6c1555509e0679f883c5",
+    "typescriptTests": 124,
+    "pythonUnitTests": 21,
+    "dockerIntegrationTests": 3,
+    "browserScenarios": 18,
+    "format": "passed",
+    "types": "passed",
+    "lint": "passed",
+    "dependencyAudit": "0 vulnerabilities",
+    "productionBuild": "passed",
+    "ciRun": "https://github.com/PDGamerSG/Reporter-to-Release/actions/runs/42387298164",
+    "ciJobs": {
+      "application": "success",
+      "worker": "success",
+      "sandbox": "success"
+    },
+    "measuredCiOutput": [
+      "application\tRun npm ci\t2026-11-07T15:37:57.6584343Z found 0 vulnerabilities",
+      "application\tRun npm run check\t2026-11-07T15:38:09.7498439Z  Test Files  14 passed (14)",
+      "application\tRun npm run check\t2026-11-07T15:38:09.7499172Z       Tests  124 passed (124)",
+      "application\tRun npm audit --audit-level=moderate\t2026-11-07T15:38:10.1871061Z found 0 vulnerabilities",
+      "application\tBrowser acceptance\t2026-11-07T15:38:54.2583789Z   18 passed (14.6s)",
+      "worker\tRun uv run --project worker pytest -c worker/pyproject.toml worker/tests -q\t2026-11-07T15:37:49.7045425Z 21 passed, 3 skipped in 0.26s",
+      "sandbox\tProve generated-code isolation and measured assertions\t2026-11-07T15:38:25.1864087Z 3 passed in 13.09s"
+    ],
+    "beforeMerge": {
+      "baseSha": "b88f4a47b4aa3356c7f282942fef39c6d1ada55d",
+      "approvedHead": "496f9aae9d7e66865517ef4b6bde21473f281834",
+      "mergedTree": "6a991efb82145ba1dd8c81a0a943143b948c1e17",
+      "typescriptTests": 124,
+      "browserScenarios": 18,
+      "format": "passed",
+      "types": "passed",
+      "lint": "passed",
+      "productionBuild": "passed",
+      "checkedAt": "2026-11-07T15:37:36.140560+00:00"
+    }
+  },
+  "production": {
+    "checkedAt": "2026-11-07T15:40:47.509616+00:00",
+    "sha": "d81ba99745d9608e760c6c1555509e0679f883c5",
+    "vercel": {
+      "id": "dpl_G7Qdq5MZpCnG9bDE4qf4trzr6uqZ",
+      "url": "https://reporter-to-release-r6lb7zmet-pallab-das-projects-d3f377fd.vercel.app",
+      "state": "READY",
+      "projectId": "prj_p7VIwQcUZo3uHYZeizYiFB4tqKgZ",
+      "teamId": "team_9DmQgMjE796WaejfWWU17kYK",
+      "target": "production"
+    },
+    "domain": {
+      "name": "reporter-to-release.pallabdas.me",
+      "verified": true,
+      "projectId": "prj_p7VIwQcUZo3uHYZeizYiFB4tqKgZ",
+      "aliasDeploymentId": "dpl_G7Qdq5MZpCnG9bDE4qf4trzr6uqZ"
+    },
+    "https": {
+      "custom": "https://reporter-to-release.pallabdas.me",
+      "customStatus": 200,
+      "immutableStatus": 200,
+      "matchingAssets": 11,
+      "assetPaths": [
+        "/_next/static/immutable/chunks/0c0hxoamwjsbw.js",
+        "/_next/static/immutable/chunks/1-w3zpy6gup21.js",
+        "/_next/static/immutable/chunks/1vkbvs5cv4r1l.js",
+        "/_next/static/immutable/chunks/25kvgcvbp6c14.js",
+        "/_next/static/immutable/chunks/2dne7iznax3mm.js",
+        "/_next/static/immutable/chunks/2gmei6acpg96t.css",
+        "/_next/static/immutable/chunks/2p53kkb69hb3l.js",
+        "/_next/static/immutable/chunks/39s0nn77ycexs.css",
+        "/_next/static/immutable/chunks/3c697kslgq7w8.js",
+        "/_next/static/immutable/chunks/3sav3yefleyvp.js",
+        "/_next/static/immutable/chunks/turbopack-3xd-7z66s-4wg.js"
+      ],
+      "health": {
+        "status": "ok",
+        "service": "Reporter-to-Release",
+        "storage": "postgres",
+        "version": "1.1.0",
+        "ai": "configured"
+      },
+      "immutableHealth": {
+        "status": "ok",
+        "service": "Reporter-to-Release",
+        "storage": "postgres",
+        "version": "1.1.0",
+        "ai": "configured"
+      },
+      "normalTlsVerification": true
+    },
+    "runs": [
+      {
+        "id": 42387397696,
+        "name": "Record verified production",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/PDGamerSG/Reporter-to-Release/actions/runs/42387397696",
+        "head_sha": "d81ba99745d9608e760c6c1555509e0679f883c5"
+      },
+      {
+        "id": 42387298164,
+        "name": "Verify application",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/PDGamerSG/Reporter-to-Release/actions/runs/42387298164",
+        "head_sha": "d81ba99745d9608e760c6c1555509e0679f883c5"
+      }
+    ],
+    "githubDeployment": {
+      "id": 7623234494,
+      "sha": "d81ba99745d9608e760c6c1555509e0679f883c5",
+      "task": "verify:vercel-production",
+      "environment": "production",
+      "state": "success",
+      "environmentUrl": "https://reporter-to-release.pallabdas.me"
+    },
+    "signedWebhook": {
+      "id": "3852727312292257792",
+      "deliveredAt": "2026-11-07T15:39:19.954Z",
+      "statusCode": 200,
+      "event": "deployment_status"
+    }
+  },
+  "moduleRegression": {
+    "checkedAt": "2026-11-07T15:44:19.056353+00:00",
+    "scope": "Module regression executed from git source at the independently verified production revision. Arbitrary price input is not exposed by the deployed ShopLite UI. This is not an HTTP reproduction.",
+    "productionSha": "d81ba99745d9608e760c6c1555509e0679f883c5",
+    "results": [
+      {
+        "label": "baseline",
+        "sourceSha": "b88f4a47b4aa3356c7f282942fef39c6d1ada55d",
+        "path": "src/lib/shoplite.ts",
+        "sha256": "3ed84474d29605e4f554c7381c6124d30b644c1be2146a1b61bf6c68ebad6c8d",
+        "checks": {
+          "overflow": {
+            "input": [
+              "1e308",
+              1,
+              "",
+              false
+            ],
+            "result": "Infinity",
+            "passed": true
+          },
+          "normalTotal": 200,
+          "normalCouponTotal": 0,
+          "seededCouponTotal": -100
+        }
+      },
+      {
+        "label": "fixed",
+        "sourceSha": "d81ba99745d9608e760c6c1555509e0679f883c5",
+        "path": "src/lib/shoplite.ts",
+        "sha256": "4814bbd54933e2fdd0d353affbe39345784d898ea8677f460cd090112e9ffd33",
+        "checks": {
+          "overflow": {
+            "input": [
+              "1e308",
+              1,
+              "",
+              false
+            ],
+            "result": "validation error",
+            "passed": true
+          },
+          "normalTotal": 200,
+          "normalCouponTotal": 0,
+          "seededCouponTotal": -100
+        }
+      }
+    ]
+  },
+  "reporterConfirmation": {
+    "checkedAt": "2026-11-07T15:45:14.021847+00:00",
+    "clusterId": "R2R-0002",
+    "actor": "Original controlled acceptance reporter",
+    "controlledAcceptance": true,
+    "customerIncident": false,
+    "usedPrivateOriginalCapability": true,
+    "preConfirmationState": "deployed",
+    "state": "verified",
+    "releaseConfirmed": true,
+    "release": {
+      "sha": "d81ba99745d9608e760c6c1555509e0679f883c5",
+      "url": "https://reporter-to-release.pallabdas.me",
+      "version": "d81ba99",
+      "deployedAt": "2026-11-07T15:39:19.928Z"
+    },
+    "headSha": "496f9aae9d7e66865517ef4b6bde21473f281834",
+    "mergeSha": "d81ba99745d9608e760c6c1555509e0679f883c5",
+    "approvalCount": 1,
+    "auditEvents": [
+      {
+        "kind": "approve_fix",
+        "at": "2026-11-07T15:33:48.589Z",
+        "title": "Human review recorded"
+      },
+      {
+        "kind": "mark_merged",
+        "at": "2026-11-07T15:37:44.482Z",
+        "title": "Human-merged pull request recorded"
+      },
+      {
+        "kind": "deploy",
+        "at": "2026-11-07T15:39:19.928Z",
+        "title": "Production deployment verified"
+      },
+      {
+        "kind": "verify_release",
+        "at": "2026-11-07T15:45:13.574Z",
+        "title": "Reporter verified the live fix"
+      }
+    ]
+  },
+  "reporterConfirmationMethod": "The original automated acceptance runner used its original controlled-report capability only after production revision verification and the module regression. This was not a human customer confirmation.",
+  "engineeringHeartbeatAtConfirmation": {
+    "connected": true,
+    "fresh": true,
+    "roomsConnected": 4,
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "lastSeenAt": "2026-11-07T15:44:49.761Z"
+  },
+  "limits": [
+    "The overflow regression runs the calculation module from the exact verified production source. The deployed web checkout has a fixed price; arbitrary-price HTTP or browser reproduction is not claimed.",
+    "The signed GitHub webhooks are real deliveries; no synthetic production event was substituted.",
+    "The released case is controlled acceptance. Live customer resolution and live production reopening are not claimed."
+  ],
+  "postReleaseHistoryObservation": {
+    "detectedAt": "2026-11-07T15:49:43.943593+00:00",
+    "originalApprovedHead": "496f9aae9d7e66865517ef4b6bde21473f281834",
+    "originalMergeSha": "d81ba99745d9608e760c6c1555509e0679f883c5",
+    "publishedMergeSha": "3970b80b381b0d2b7fc544d268bd5ba45680cab5",
+    "publishedFixParentSha": "45624dce1bcca8af937666efb4acecf328ded41e",
+    "sameMergeTree": true,
+    "sameFixParentTree": true,
+    "approvedImplementationAndRegressionBytesUnchanged": true,
+    "originalMergeHeaders": [
+      "tree",
+      "parent",
+      "parent",
+      "author",
+      "committer",
+      "gpgsig"
+    ],
+    "publishedMergeHeaders": [
+      "tree",
+      "parent",
+      "parent",
+      "author",
+      "committer"
+    ],
+    "sourceDelta": false,
+    "note": "Published main and the local checkout were independently rewritten after the recorded release. This session did not request or perform that rewrite. GitHub PR metadata still records the original exact approved head and original merge. Historical release evidence remains bound to its actual observed SHAs."
+  },
+  "postReleaseHistoryProduction": {
+    "checkedAt": "2026-11-07T15:50:13.534018+00:00",
+    "sha": "3970b80b381b0d2b7fc544d268bd5ba45680cab5",
+    "vercel": {
+      "id": "dpl_4gYT29WQRBNYzM7uCusQoJqnxKz9",
+      "url": "https://reporter-to-release-gqk8uj6te-pallab-das-projects-d3f377fd.vercel.app",
+      "state": "READY",
+      "projectId": "prj_p7VIwQcUZo3uHYZeizYiFB4tqKgZ",
+      "teamId": "team_9DmQgMjE796WaejfWWU17kYK",
+      "target": "production"
+    },
+    "domain": {
+      "name": "reporter-to-release.pallabdas.me",
+      "verified": true,
+      "projectId": "prj_p7VIwQcUZo3uHYZeizYiFB4tqKgZ",
+      "aliasDeploymentId": "dpl_4gYT29WQRBNYzM7uCusQoJqnxKz9"
+    },
+    "https": {
+      "custom": "https://reporter-to-release.pallabdas.me",
+      "customStatus": 200,
+      "immutableStatus": 200,
+      "matchingAssets": 11,
+      "assetPaths": [
+        "/_next/static/immutable/chunks/0c0hxoamwjsbw.js",
+        "/_next/static/immutable/chunks/1-w3zpy6gup21.js",
+        "/_next/static/immutable/chunks/1vkbvs5cv4r1l.js",
+        "/_next/static/immutable/chunks/1xal7-h8odhdk.js",
+        "/_next/static/immutable/chunks/25kvgcvbp6c14.js",
+        "/_next/static/immutable/chunks/2gmei6acpg96t.css",
+        "/_next/static/immutable/chunks/2p53kkb69hb3l.js",
+        "/_next/static/immutable/chunks/39s0nn77ycexs.css",
+        "/_next/static/immutable/chunks/3c697kslgq7w8.js",
+        "/_next/static/immutable/chunks/3sav3yefleyvp.js",
+        "/_next/static/immutable/chunks/turbopack-3xd-7z66s-4wg.js"
+      ],
+      "health": {
+        "status": "ok",
+        "service": "Reporter-to-Release",
+        "storage": "postgres",
+        "version": "1.1.0",
+        "ai": "configured"
+      },
+      "immutableHealth": {
+        "status": "ok",
+        "service": "Reporter-to-Release",
+        "storage": "postgres",
+        "version": "1.1.0",
+        "ai": "configured"
+      },
+      "normalTlsVerification": true
+    },
+    "runs": [
+      {
+        "id": 42388001591,
+        "name": "Record verified production",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/PDGamerSG/Reporter-to-Release/actions/runs/42388001591",
+        "head_sha": "3970b80b381b0d2b7fc544d268bd5ba45680cab5"
+      },
+      {
+        "id": 42387882020,
+        "name": "Verify application",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/PDGamerSG/Reporter-to-Release/actions/runs/42387882020",
+        "head_sha": "3970b80b381b0d2b7fc544d268bd5ba45680cab5"
+      }
+    ],
+    "githubDeployment": {
+      "id": 7623321195,
+      "sha": "3970b80b381b0d2b7fc544d268bd5ba45680cab5",
+      "task": "verify:vercel-production",
+      "environment": "production",
+      "state": "success",
+      "environmentUrl": "https://reporter-to-release.pallabdas.me"
+    },
+    "signedWebhook": {
+      "id": "3852728278617948160",
+      "deliveredAt": "2026-11-07T15:46:49.932Z",
+      "statusCode": 200,
+      "event": "deployment_status"
+    }
+  }
+}
