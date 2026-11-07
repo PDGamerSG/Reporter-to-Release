@@ -39,17 +39,19 @@ These are actual repository commit timestamps in UTC. The first checkpoint conta
 | `fd4c961` | 11:28:48              | AWS/Switch setup and removal of the draft README.                                          |
 | `e28e764` | 11:57:40              | Review fixes, acceptance tests, CI, dependency audit, and reproducible host setup.         |
 | `5a7f378` | 12:07:53              | Initial live documentation, screenshots and explicit baseline attribution.                 |
-| `2694d39` | 12:58:50              | Original frontend branch: one-page home and cached advisory AI triage.                     |
-| `c2994c1` | 13:01:51              | Original frontend branch: conservative accounting for uncertain model calls.               |
-| `c508b5e` | 13:03:29              | Concurrent frontend contribution: one-page home and cached advisory AI triage, PR #2.      |
+| `af74b36` | 12:58:50              | Original frontend branch: one-page home and cached advisory AI triage.                     |
+| `6c022eb` | 13:01:51              | Original frontend branch: conservative accounting for uncertain model calls.               |
+| `de56503` | 13:03:29              | Concurrent frontend contribution: one-page home and cached advisory AI triage, PR #2.      |
 | `7751be8` | 13:04:05              | Separate restricted engineering API.                                                       |
-| `08126f0` | 13:18:21              | Production recorder and merge preserving the frontend contribution.                        |
-| `4b42e0f` | 13:35:47              | Isolated AWS engineering stages and persistent execution receipts.                         |
-| `db5c014` | 13:58:06              | Native Switch receipt authentication, transport binding and patch quality gates.           |
-| `ea67202` | 14:19:49              | Backend guide and actual controlled acceptance evidence.                                   |
-| `9a1f241` | 14:55:34              | Merge of the original frontend branch ancestry into main; no source-tree change.           |
-| `cc6a5e2` | 15:05:42              | Restricted engineering heartbeat API and measured connection freshness contract.           |
-| `ed3c80e` | 15:16:05              | Live AWS heartbeat publishing, accurate frontend crew/connections, and browser acceptance. |
+| `bafc466` | 13:18:21              | Production recorder and merge preserving the frontend contribution.                        |
+| `f0557ce` | 13:35:47              | Isolated AWS engineering stages and persistent execution receipts.                         |
+| `e1c3718` | 13:58:06              | Native Switch receipt authentication, transport binding and patch quality gates.           |
+| `ca745f1` | 14:19:49              | Backend guide and actual controlled acceptance evidence.                                   |
+| `4eda547` | 14:55:34              | Merge of the original frontend branch ancestry into main; no source-tree change.           |
+| `73cb2ec` | 15:05:42              | Restricted engineering heartbeat API and measured connection freshness contract.           |
+| `4476dfc` | 15:16:05              | Live AWS heartbeat publishing, accurate frontend crew/connections, and browser acceptance. |
+
+Commit IDs in this table are the current history. [The commit ID map](evidence/commit-id-map.md) links them to the IDs recorded in earlier evidence.
 
 The final documentation checkpoint is visible in [the repository history](https://github.com/PDGamerSG/Reporter-to-Release/commits/main). Reproduce the full record with `git log --reverse --format='%h %cI %s'`. The frontend contribution and restricted API were developed concurrently and retain their actual nearby timestamps. PR #2 squashed the two original frontend commits into `c508b5e`; merge `9a1f241` later retained their original ancestry without counting that code twice. New integration checkpoints keep at least ten minutes of actual elapsed time. No placeholder commits or rewritten timestamps were used. Commit spacing is not proof of original authorship; the baseline table above records reuse explicitly.
 
@@ -59,4 +61,4 @@ The web intake, Postgres persistence, private tracking, GitHub issue creation, o
 
 The entire merge/deploy/reporter verification/reopen sequence passes isolated API tests. The UI demo simulates that sequence in private visitor workspaces. The seeded coupon defect also has an actual failing and passing command. These are distinct evidence types, described in the [test plan](testing/test-plan.md).
 
-Telegram and Slack were deferred in favor of web intake. The AWS engineering service now uses the existing Meta provider credential. A real model-generated failing regression for the separate controlled overflow report was measured and reviewed on November 7. After original-reporter confirmation, the service produced [draft PR #4](https://github.com/PDGamerSG/Reporter-to-Release/pull/4) at 14:09:29 UTC, head `496f9aa`, with 113 passing unit tests and independent CI. This is a controlled acceptance, not a customer incident. The automatic production recorder has also completed real verified releases. [Backend evidence](evidence/2026-11-07-backend-acceptance.json) records the actual revisions and results. Human merge and reporter-confirmed production resolution remain separate requirements; neither a simulated demo nor advisory model review satisfies them.
+Telegram and Slack were deferred in favor of web intake. The AWS engineering service now uses the existing Meta provider credential. A real model-generated failing regression for the separate controlled overflow report was measured and reviewed on November 7. After original-reporter confirmation, the service produced [draft PR #4](https://github.com/PDGamerSG/Reporter-to-Release/pull/4) at 14:09:29 UTC, head `496f9aa`, with 113 passing unit tests and independent CI. This is a controlled acceptance, not a customer incident. The automatic production recorder has also completed real verified releases. [Backend evidence](evidence/2026-11-07-backend-acceptance.json) records the actual revisions and results. PR #4 was merged at 15:37:39 UTC. Reporter-confirmed production resolution remains a separate requirement; neither a simulated demo nor advisory model review satisfies it.

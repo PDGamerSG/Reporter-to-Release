@@ -20,7 +20,7 @@ This repository contains the web app, guarded workflow API, durable ledger, Swit
 
 The original one-page frontend branch is merged into `main`, including its original commits. The live workspace now reads the AWS engineering service's actual provider and room connections. Stale or partial connections cannot appear healthy, and the demo keeps its model roles illustrative. [Combined release evidence](docs/evidence/2026-11-07-combined-release.json) records the merge, checks and deployment.
 
-The controlled backend acceptance produced a real failing regression, original-reporter confirmation and [draft fix PR #4](https://github.com/PDGamerSG/Reporter-to-Release/pull/4), with 113 passing tests and all CI jobs green. This is a controlled test of the live backend. Human approval, merge and reporter-confirmed production resolution remain required. [The evidence record](docs/evidence/2026-11-07-backend-acceptance.json) contains actual revisions and measured output.
+The controlled backend acceptance produced a real failing regression, original-reporter confirmation and [fix PR #4](https://github.com/PDGamerSG/Reporter-to-Release/pull/4), with 113 passing tests and all CI jobs green. PR #4 was merged on November 7. This is a controlled test of the live backend. Reporter-confirmed production resolution remains required. [The evidence record](docs/evidence/2026-11-07-backend-acceptance.json) contains actual revisions and measured output.
 
 Built for Flip the Switch, November 4–7, 2026. This repository's implementation began November 7. The concept and generic Switch client come from earlier research; [the contribution record](docs/EVENT_CONTRIBUTION.md) identifies that baseline and the new work without counting earlier benchmarks as event validation.
 
@@ -64,7 +64,7 @@ The API checks authority and lifecycle prerequisites on every write. The concier
 
 ## Screenshots
 
-Captured on November 7, 2026 from the local production build of combined release `ed3c80e`, in Chromium at 1440 × 900, light theme, with reduced motion. Dashboard and dossier images show the labeled demo. The one-page report form has a sample selected without submitting it. ShopLite is the seeded test app. The production hostname and exact immutable release were checked separately in the linked release evidence.
+Captured on November 7, 2026 from the local production build of combined release `4476dfc`, in Chromium at 1440 × 900, light theme, with reduced motion. Dashboard and dossier images show the labeled demo. The one-page report form has a sample selected without submitting it. ShopLite is the seeded test app. The production hostname and exact immutable release were checked separately in the linked release evidence.
 
 <p align="center">
   <img src="docs/images/evidence.png" width="860"
@@ -137,7 +137,7 @@ npm run start -- --port 3107
 npm run test:e2e
 ```
 
-The combined application passed 123 TypeScript tests, 21 Python unit tests and 18 browser scenarios. CI also runs three actual Docker integration tests, formatting, lint, types, dependency audit and production build. The controlled draft fix passed 113 TypeScript tests on its own earlier base. The [test plan](docs/testing/test-plan.md) separates live acceptance evidence from simulations and explains how to run the Docker checks.
+The combined application passed 128 TypeScript tests, 21 Python unit tests and 18 browser scenarios. CI also runs three actual Docker integration tests, formatting, lint, types, dependency audit and production build. The controlled draft fix passed 113 TypeScript tests on its own earlier base. The [test plan](docs/testing/test-plan.md) separates live acceptance evidence from simulations and explains how to run the Docker checks.
 
 To run the seeded failing-to-passing example:
 
@@ -197,7 +197,7 @@ Configure production secrets, initialize the ledger with `npm run db:init`, depl
 - Redaction and instruction detection are heuristic. Voice reports and screenshot uploads are not supported by the web form.
 - The AWS service executes and measures its tests in isolated containers. The ledger still trusts authorized evidence submissions; it does not independently attest every command or derive changed paths from GitHub. Human review remains required.
 - Owner access uses a shared key. Sensitive approval gates require verified GitHub identities; a second authorized human must be configured for those fixes.
-- The complete release/reopen sequence is proven in isolated tests and the labeled demo. Live controlled acceptance additionally proves model-generated reproduction and draft fix, reporter gating, CI and automatic production recording. PR #4 awaits human review and merge; no released customer resolution is claimed.
+- The complete release/reopen sequence is proven in isolated tests and the labeled demo. Live controlled acceptance additionally proves model-generated reproduction and draft fix, reporter gating, CI and automatic production recording. PR #4 was merged on November 7; no released customer resolution is claimed.
 - Production recording depends on trusted-main CI, Vercel API access and the signed GitHub webhook. A failed check, wrong alias or unhealthy release is left unrecorded. [Operations](docs/operations/production-recorder.md) describes recovery.
 - One JSON ledger per workspace and one AWS host limit scale and availability. Delivery can repeat across a crash at an external-send boundary; backup/restore operations remain the owner's responsibility.
 

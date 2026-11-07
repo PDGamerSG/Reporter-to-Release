@@ -33,13 +33,22 @@ export async function containsCommit(
   head: string,
 ): Promise<boolean> {
   if (base === head) return true;
+  // A commit GitHub no longer has cannot prove ancestry, so release evidence
+  // fails closed instead of rejecting the whole webhook delivery.
   const response = await githubRequest(
     `/repos/${repository}/compare/${base}...${head}`,
+    {},
+    [404],
   );
+  if (response.status === 404) return false;
   const data = await response.json();
   return data.status === "ahead" || data.status === "identical";
 }
-export async function githubRequest(path: string, init: RequestInit = {}) {
+export async function githubRequest(
+  path: string,
+  init: RequestInit = {},
+  allowedStatuses: number[] = [],
+) {
   if (!process.env.GITHUB_TOKEN)
     throw new DomainError("GitHub API credentials are not configured.", 503);
   const response = await fetch(`https://api.github.com${path}`, {
@@ -54,7 +63,7 @@ export async function githubRequest(path: string, init: RequestInit = {}) {
     signal: AbortSignal.timeout(15000),
     cache: "no-store",
   });
-  if (!response.ok)
+  if (!response.ok && !allowedStatuses.includes(response.status))
     throw new DomainError(`GitHub returned HTTP ${response.status}.`, 502);
   return response;
 }
