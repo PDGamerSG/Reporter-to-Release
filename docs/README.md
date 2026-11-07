@@ -1,12 +1,14 @@
 # Documentation
 
-Reporter-to-Release is Team Vulcan's web-first bug desk. The public site is [reporter-to-release.pallabdas.me](https://reporter-to-release.pallabdas.me/). The live intake, durable ledger, private tracking, GitHub issue relay, and two-room Switch worker are deployed. Telegram and Slack are deferred. Engineering provider runtimes still need authentication in Switch Console.
+Reporter-to-Release is Team Vulcan's web-first bug desk. The public site is [reporter-to-release.pallabdas.me](https://reporter-to-release.pallabdas.me/). The live intake, durable ledger, private tracking, GitHub issue relay, Switch concierge and bounded AWS engineering service are deployed. Telegram and Slack are deferred. Human review and merge remain required for fixes.
 
 - [User guide](user-guide.md): report a bug, explore the isolated demo, and operate the live desk.
 - [Architecture](ARCHITECTURE.md): boundaries, lifecycle, persistence, and deployment diagrams.
 - [Configuration](CONFIGURATION.md): environment variables and credential handling.
 - [API](api/README.md): public, owner, worker, and GitHub endpoints.
 - [Deployment and operations](operations/deployment.md): local setup, AWS, Vercel, DNS, recovery, and shutdown.
+- [Engineering runtime](operations/engineering-runtime.md): role handoffs, sandbox, model limits, draft PRs and recovery.
+- [Production recorder](operations/production-recorder.md): exact-revision Vercel verification and signed GitHub release evidence.
 - [Threat model](security/threat-model.md): protected assets, authority checks, and remaining risks.
 - [Test plan](testing/test-plan.md): automated coverage and the distinction between simulated and live evidence.
 - [Design](DESIGN.md): visual tokens, responsive layouts, and accessibility.

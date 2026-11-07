@@ -16,9 +16,13 @@
 
 ## Tasks
 
-- [ ] Write failing HTTP tests for a sanitized engineering work snapshot, separate authority, reporter gate, and rejected approval/deployment commands. Implement `src/lib/engineering.ts` and add its route in `src/lib/api.ts`; run the focused tests.
-- [ ] Write failing Python tests for path/symlink restrictions, actual failing/passing sandbox execution, model JSON validation, persistent call limits, and idempotent PR publication. Implement `worker/src/r2r_engineering/` and run the focused worker suite.
-- [ ] Write failing TypeScript tests for wrong-SHA, preview, unready, wrong-project, stale-alias, and unhealthy production evidence. Implement `scripts/production-release.ts` and the trusted-main GitHub workflow; run the focused tests.
-- [ ] Extend bootstrap/deployment scripts for private engineering identities and restricted Bedrock IAM. Deploy, invoke the real model, exercise the networkless sandbox, and prove a live Switch handoff.
-- [ ] Submit a clearly labeled controlled acceptance report; preserve its original reporter capability, confirm only its actual reproduction, and verify a real model-generated draft PR. Link that PR to this thread.
-- [ ] Run required backend checks, review changes, commit verified chunks with real spacing, deploy, verify the automated production event, and update backend docs and README truthfully at the end.
+- [x] Write failing HTTP tests for a sanitized engineering work snapshot, separate authority, reporter gate, and rejected approval/deployment commands. Implement `src/lib/engineering.ts` and add its route in `src/lib/api.ts`; run the focused tests.
+- [x] Write failing Python tests for path/symlink restrictions, actual failing/passing sandbox execution, model JSON validation, persistent call limits, and idempotent PR publication. Implement `worker/src/r2r_engineering/` and run the focused worker suite.
+- [x] Write failing TypeScript tests for wrong-SHA, preview, unready, wrong-project, stale-alias, and unhealthy production evidence. Implement `scripts/production-release.ts` and the trusted-main GitHub workflow; run the focused tests.
+- [x] Extend bootstrap/deployment scripts for private engineering identities and restricted Bedrock IAM. Deploy, invoke the real model, exercise the networkless sandbox, and prove a live Switch handoff.
+- [x] Submit a clearly labeled controlled acceptance report; preserve its original reporter capability, confirm only its actual reproduction, and verify a real model-generated draft PR. Link that PR to this thread.
+- [x] Run required backend checks, review changes, commit verified chunks with real spacing, deploy, verify the automated production event, and update backend docs and README truthfully at the end.
+
+## Verified outcome
+
+AWS handoffs, isolated reproduction and fix execution, original acceptance reporter confirmation, and draft PR #4 are live. PR head `496f9aa` passed all CI jobs and 113 TypeScript tests. The automatic recorder verified main checkpoint `db5c014` and delivered its actual signed production webhook with HTTP 200. See [acceptance evidence](../../evidence/2026-11-07-backend-acceptance.json). The deployed provider is explicitly Meta because real Bedrock requests hit account quota; the AWS role adapter remains optional. Human approval and merge are still required.

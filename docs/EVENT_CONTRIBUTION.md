@@ -19,6 +19,8 @@ The imported client lives under [worker/src/switchkit](../worker/src/switchkit).
 - The versioned Postgres ledger and concurrency handling; local development file fallback and independent demo workspaces.
 - The authenticated Next.js API, private reporter-capability tracking, signed GitHub relay, reviewed-head checks, review dismissal, and out-of-order deployment reconciliation.
 - The project-specific Python concierge worker, persistence receipts, engineering sender boundary, Switch room bootstrap, AWS deployment scripts, and web report-to-issue/dossier delivery.
+- The restricted engineering API and AWS manager/reproducer/fixer/advisory-review runtime, receipt-bound native handoffs, networkless regression containers, durable model budgets and exact-patch draft PR publisher.
+- The trusted-main Vercel production recorder, checking full commit SHA, project, alias and health before GitHub deployment evidence is published.
 - The responsive operator dashboard, public intake/tracker, and ShopLite's executable seeded coupon regression.
 - New application/worker/browser tests, CI, production deployment, Namecheap DNS/TLS setup, screenshots, and final documentation.
 
@@ -28,16 +30,22 @@ Sources: [build plan](BUILD_PLAN.md), [source](../src), [worker adapter](../work
 
 These are actual repository commit timestamps in UTC. The first checkpoint contains setup and the build plan, not the completed application. Work was committed incrementally; no dates or authors were backdated to imply earlier event activity.
 
-| Commit    | UTC, November 7, 2026 | Checkpoint                                                                         |
-| --------- | --------------------- | ---------------------------------------------------------------------------------- |
-| `c8cb769` | 10:33:46              | Application architecture and foundation, eight setup files.                        |
-| `d79d392` | 10:44:02              | Guarded domain lifecycle and durable delivery ledger.                              |
-| `f1706e7` | 10:54:39              | Authenticated APIs, project worker, and the initial draft README.                  |
-| `e8a89ae` | 11:09:12              | Responsive dashboard and public reporter interface.                                |
-| `fd4c961` | 11:28:48              | AWS/Switch setup and removal of the draft README.                                  |
-| `e28e764` | 11:57:40              | Review fixes, acceptance tests, CI, dependency audit, and reproducible host setup. |
+| Commit    | UTC, November 7, 2026 | Checkpoint                                                                            |
+| --------- | --------------------- | ------------------------------------------------------------------------------------- |
+| `c8cb769` | 10:33:46              | Application architecture and foundation, eight setup files.                           |
+| `d79d392` | 10:44:02              | Guarded domain lifecycle and durable delivery ledger.                                 |
+| `f1706e7` | 10:54:39              | Authenticated APIs, project worker, and the initial draft README.                     |
+| `e8a89ae` | 11:09:12              | Responsive dashboard and public reporter interface.                                   |
+| `fd4c961` | 11:28:48              | AWS/Switch setup and removal of the draft README.                                     |
+| `e28e764` | 11:57:40              | Review fixes, acceptance tests, CI, dependency audit, and reproducible host setup.    |
+| `5a7f378` | 12:07:53              | Initial live documentation, screenshots and explicit baseline attribution.            |
+| `c508b5e` | 13:03:29              | Concurrent frontend contribution: one-page home and cached advisory AI triage, PR #2. |
+| `7751be8` | 13:04:05              | Separate restricted engineering API.                                                  |
+| `08126f0` | 13:18:21              | Production recorder and merge preserving the frontend contribution.                   |
+| `4b42e0f` | 13:35:47              | Isolated AWS engineering stages and persistent execution receipts.                    |
+| `db5c014` | 13:58:06              | Native Switch receipt authentication, transport binding and patch quality gates.      |
 
-The later verification and final documentation checkpoints are visible in [the repository history](https://github.com/PDGamerSG/Reporter-to-Release/commits/main). Reproduce the full record with `git log --reverse --format='%h %cI %s'`. Commit spacing reflects actual elapsed work and is not proof of a feature's original authorship; the baseline table above records reuse explicitly.
+The final documentation checkpoint is visible in [the repository history](https://github.com/PDGamerSG/Reporter-to-Release/commits/main). Reproduce the full record with `git log --reverse --format='%h %cI %s'`. The frontend contribution and restricted API were developed concurrently and retain their actual nearby timestamps. Commit spacing is not proof of original authorship; the baseline table above records reuse explicitly.
 
 ## What has and has not been demonstrated
 
@@ -45,4 +53,4 @@ The web intake, Postgres persistence, private tracking, GitHub issue creation, o
 
 The entire merge/deploy/reporter verification/reopen sequence passes isolated API tests. The UI demo simulates that sequence in private visitor workspaces. The seeded coupon defect also has an actual failing and passing command. These are distinct evidence types, described in the [test plan](testing/test-plan.md).
 
-Telegram and Slack were deferred in favor of web intake. Engineering model-provider runtimes are not authenticated. No live autonomous model-written fix, real fix pull request, human merge, or reporter-confirmed production fix is claimed. Future demonstrations should link their actual issues, PRs, reviews, deployments, and reporter evidence without relabeling the current synthetic examples.
+Telegram and Slack were deferred in favor of web intake. The AWS engineering service now uses the existing Meta provider credential. A real model-generated failing regression for the separate controlled overflow report was measured and reviewed on November 7. After original-reporter confirmation, the service produced [draft PR #4](https://github.com/PDGamerSG/Reporter-to-Release/pull/4) at 14:09:29 UTC, head `496f9aa`, with 113 passing unit tests and independent CI. This is a controlled acceptance, not a customer incident. The automatic production recorder has also completed real verified releases. [Backend evidence](evidence/2026-11-07-backend-acceptance.json) records the actual revisions and results. Human merge and reporter-confirmed production resolution remain separate requirements; neither a simulated demo nor advisory model review satisfies them.

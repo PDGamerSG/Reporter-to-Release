@@ -30,6 +30,10 @@ The desk accepts untrusted public text while engineering may have repository acc
 
 ## Limits and trust assumptions
 
+The AWS engineering orchestrator is trusted code with a repository credential and Docker socket. Generated code runs in a separate container as UID 10001, with no network, credentials, socket, capabilities or writable root. Only the ShopLite implementation and a per-bug test may be edited; symlinks, traversal, oversized output and changed dependency locks are rejected. Tests have fixed memory, CPU, process, output and time limits. Type/lint checks use a larger bounded memory allowance. An independent bearer prevents engineering from answering a reporter or recording human approvals, merges or deployments. Sources: [runtime](../../worker/src/r2r_engineering/runtime.py), [sandbox](../../worker/src/r2r_engineering/sandbox.py), [engineering API](../../src/lib/engineering.ts), [actual Docker tests](../../worker/tests/test_sandbox_integration.py).
+
+Native handoffs bind the exact event ID returned by the authenticated manager send, addressed status and task content. The legacy concierge command sender is learned through that same receipt-bound protocol in a private probe room. A claimed display name or registered UUID in report text cannot establish this binding. Source: [identity probe](../../worker/src/r2r_engineering/identity.py).
+
 - Redaction and instruction detection use deterministic patterns. They can miss novel encodings, sensitive context, and adversarial wording. They are not a complete data-loss prevention system or proof that model execution is safe.
 - The ledger records test evidence supplied by authorized engineering actors. It does not execute the command, independently verify pasted output, or independently derive submitted changed paths from the PR. Human review must check those facts.
 - The owner web interface uses one shared key. It has no individual account audit, SSO, MFA, or delegated web roles. Sensitive approvals therefore require verified GitHub identities.
@@ -38,6 +42,6 @@ The desk accepts untrusted public text while engineering may have repository acc
 - Tracking capabilities are bearer secrets without a recovery or individual revocation interface. Treat complete links as private. Screenshot and release links need separate visibility review; the public projection excludes internal screenshots and strips query/fragment credentials from release URLs.
 - Rate limits are pseudonymous and intentionally simple. Public deployment still needs operational monitoring and stronger abuse controls before large-scale exposure.
 - EC2 and its Docker volumes are a single failure domain. Snapshots and restoration procedures must be operated by the owner; there is no automatic multi-region failover.
-- Telegram/Slack bridges and engineering model runtimes are not authenticated in the current deployment. Their future installation changes the attack surface and requires another boundary review.
+- Telegram/Slack bridges remain deferred. Their future installation changes the attack surface and requires another boundary review. Active engineering roles use the same configured model provider; separate role calls are not independent human judgment.
 
 Keep secrets in private deployment configuration. Diagnostic traces can capture form values and cookies, so the owner browser spec disables tracing. Never post an environment dump or complete tracking link in a public GitHub issue. Source: [owner browser test](../../e2e/owner.spec.ts), [ignore rules](../../.gitignore).

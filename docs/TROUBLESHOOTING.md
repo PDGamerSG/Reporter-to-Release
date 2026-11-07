@@ -32,9 +32,11 @@ An unacknowledged job becomes available after its lease expires. Failed jobs ret
 
 ## The manager receives a dossier but no fix appears
 
-The registered manager is a destination, not an authenticated model runtime. Sign in to the chosen provider in Switch Console, connect the runtime to the owned engineering room, and add its agent ID to the worker allowlist. The templates describe engineering roles but are not automatically instantiated by the AWS bootstrap.
+Check `r2r-engineering-1` through SSM and read the bug's engineering notes. The deployed service supports only normal ShopLite calculation reports. Unsupported reports, missing facts, exhausted model calls, failed baseline checks and rejected advisory reviews stop with an honest note. A reproduction must be confirmed by its original reporter before the fixer can run. A produced draft PR still needs human review and merge.
 
-Sources: [bootstrap](../scripts/bootstrap-switch.py), [templates](../templates/r2r-desk.template.yaml).
+Use [the engineering runbook](operations/engineering-runtime.md) to deploy or retry after correcting an operational failure. Preserve measured artifacts and prepared patches. Native sender IDs differ from registered UUIDs; rerun the authenticated receipt-binding deployment step rather than trusting display names or widening an allowlist. Do not probe the already-connected main room with a second session of the same agent: Switch permits one acting session per agent per room. The checked-in probe uses its own private room.
+
+Sources: [bootstrap](../scripts/bootstrap-switch.py), [runtime](../worker/src/r2r_engineering/runtime.py), [identity probe](../worker/src/r2r_engineering/identity.py).
 
 ## GitHub accepts the webhook but the bug does not advance
 

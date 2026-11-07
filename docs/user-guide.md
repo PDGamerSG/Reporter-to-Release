@@ -33,15 +33,15 @@ ShopLite is a sandbox with no real payment processing. Its report link enters th
 
 Select **Open live workspace** and enter the configured owner access key. The status badge changes to **Live workspace**. Use **Workspace access** and **Return to the demo** to sign out. Owner access is a shared key for this deployment; there are no individual web accounts or SSO.
 
-| View                 | Use                                                                                                                      |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Overview / Bug inbox | Search, filter, and open clusters. Impact counts reflect linked reports.                                                 |
-| Activity             | Inspect recorded workflow decisions and actor attribution.                                                               |
-| Releases             | See production release evidence and reporter confirmation state.                                                         |
-| Agent crew           | Read role responsibilities and access boundaries. Provider labels describe intended roles, not proof of active runtimes. |
-| Airlock              | Review held reports and replace unsafe input with clean observed facts.                                                  |
-| Connections          | Read database, Switch heartbeat, GitHub relay, and deferred chat status.                                                 |
-| Workflow guide       | Review the required evidence and human/reporter gates.                                                                   |
+| View                 | Use                                                                                                                                                                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Overview / Bug inbox | Search, filter, and open clusters. Impact counts reflect linked reports.                                                                                                            |
+| Activity             | Inspect recorded workflow decisions and actor attribution.                                                                                                                          |
+| Releases             | See production release evidence and reporter confirmation state.                                                                                                                    |
+| Agent crew           | Read role responsibilities and access boundaries. The deployed AWS runtime uses one configured provider for its bounded ShopLite stages; UI provider labels describe role examples. |
+| Airlock              | Review held reports and replace unsafe input with clean observed facts.                                                                                                             |
+| Connections          | Read database, Switch heartbeat, GitHub relay, and deferred chat status.                                                                                                            |
+| Workflow guide       | Review the required evidence and human/reporter gates.                                                                                                                              |
 
 Record reproduction and fix evidence in the dossier dialog. The ledger requires the original reporter's confirmation before fixing and human review before a signed merge can advance it. A successful signed production deployment containing that merge unlocks release verification. Owner buttons cannot impersonate the live GitHub merge/deployment relay.
 

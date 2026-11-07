@@ -72,6 +72,18 @@ All use `POST` with `Authorization: Bearer WORKER_TOKEN`. These credentials stay
 
 Source: [worker API](../../src/lib/api.ts), [outbox](../../src/lib/domain/outbox.ts), [native identity checks](../../worker/src/r2r_worker/boundary.py). The bearer authenticates the service; the worker separately checks Switch sender identity and room boundaries before forwarding a command.
 
+## Engineering endpoints
+
+These use the separate `Authorization: Bearer ENGINEERING_TOKEN`. The concierge bearer cannot access them. Responses omit reporter identities, private capabilities, routing information and raw input hashes.
+
+| Method and path                             | Behavior                                                                                                                                                       |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/engineering/work?after=:bugId`    | Up to 100 actionable sanitized clusters in ID order, with `nextCursor` for the next page. Includes reproduction and confirmation status needed to resume work. |
+| `POST /api/engineering/bugs/:bugId/actions` | Only `start_reproduction`, `propose_reproduction`, `start_fix`, and `submit_fix`. Existing lifecycle guards still apply.                                       |
+| `POST /api/engineering/bugs/:bugId/notes`   | A bounded operational audit note, with JSON `{ "summary": "..." }`.                                                                                            |
+
+Engineering cannot answer a reporter, approve or merge a fix, record a deployment, release quarantine, or claim concierge deliveries. Sources: [engineering dispatcher](../../src/lib/engineering.ts), [boundary tests](../../tests/engineering.test.ts).
+
 ## GitHub webhook
 
 `POST /api/webhooks/github` requires `X-Hub-Signature-256`, `X-GitHub-Event`, and `X-GitHub-Delivery`. Configure the repository's webhook for `pull_request`, `pull_request_review`, and `deployment_status`, with the same private webhook secret.

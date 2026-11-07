@@ -13,11 +13,14 @@ flowchart LR
   worker <--> switch["Owned rooms<br/>Switch server on AWS"]
   app --> github["Issues and commit comparison<br/>GitHub API"]
   github -.-> app
-  runtimes["Engineering provider runtimes<br/>authentication pending"] -.-> switch
+  runtimes["Engineering manager and model stages<br/>Python service on AWS"] <--> switch
+  runtimes --> app
+  runtimes --> sandbox["Generated-code execution<br/>networkless Docker sandbox"]
+  runtimes --> github
   chat["Telegram and Slack<br/>deferred"] -.-> switch
 ```
 
-Sources: [API](../src/lib/api.ts), [worker](../worker/src/r2r_worker/main.py), [GitHub relay](../src/lib/integrations/github.ts), [worker compose](../infra/worker.compose.yml). Dashed runtime and chat connections are not active. A registered manager destination does not mean an engineering model is running.
+Sources: [API](../src/lib/api.ts), [worker](../worker/src/r2r_worker/main.py), [engineering runtime](../worker/src/r2r_engineering/runtime.py), [GitHub relay](../src/lib/integrations/github.ts), [engineering compose](../infra/engineering.compose.yml). Telegram and Slack remain deferred. The active engineering service runs model stages through four Switch identities; model review is advisory.
 
 ## Components
 
@@ -88,6 +91,16 @@ Source: [workflow](../src/lib/domain/workflow.ts). At least one affected reporte
 
 The ledger validates who supplied evidence and the allowed transition. Sensitive approvals count distinct human identities verified by signed GitHub reviews; the shared owner web key cannot satisfy that gate. The ledger does not execute submitted shell commands or prove that pasted test output is authentic. Humans and configured engineering runtimes are responsible for running and reviewing the tests. The isolated demo uses explicit simulation controls and cannot record a real merge or deployment.
 
+## Engineering execution and production recording
+
+The [engineering service](../worker/src/r2r_engineering/runtime.py) reads sanitized work with an independent bearer, creates a private room per bug, and sends targeted tasks between manager, reproducer, fixer and reviewer. Native transport sender IDs differ from registered agent UUIDs. Each handoff matches the authenticated send receipt's event ID, addressed flag and exact task body. The concierge's legacy command allowlist is bound through a separate private receipt probe, never through a display name.
+
+The reproducer clones the public main revision without a GitHub credential, checks the existing unit suite, and proposes only a new regression. A networkless sandbox must measure a genuine assertion failure. An independent advisory model review checks it against the dossier. The service records that evidence, then waits for the original reporter's capability-backed confirmation.
+
+Fixes can change only `src/lib/shoplite.ts`; the new regression is retained. The sandbox measures the regression, existing unit suite, formatting, ESLint and TypeScript before a draft PR can be published. Models return bounded JSON file contents, never shell instructions. SQLite persists call budgets, measured artifacts, prepared patches and publication receipts. Existing PR branches must match the tested files and base before reuse. Reports outside this module require human investigation. Sources: [sandbox](../worker/src/r2r_engineering/sandbox.py), [publisher](../worker/src/r2r_engineering/github.py), [state](../worker/src/r2r_engineering/state.py).
+
+The [production recorder](../scripts/production-release.ts) runs only after successful trusted-main CI. It verifies the exact full SHA, project, team, production target, READY state, immutable health and custom-domain alias before recording GitHub deployment success. GitHub then sends the real signed webhook. See [the recorder runbook](operations/production-recorder.md).
+
 ## Data model
 
 One physical table, `r2r_ledgers`, stores each workspace as a versioned JSON document. A live workspace uses the key `live`; each demo uses a separate signed-session-derived key. The following entities are logical objects inside that document, not separate SQL tables.
@@ -121,6 +134,9 @@ flowchart LR
   switch --> pg[("Switch database<br/>Docker volume")]
   worker["Python worker container<br/>persistent SQLite receipts"] --> switch
   worker --> vercel
+  engineering["Engineering service<br/>persistent stage receipts"] --> switch
+  engineering --> vercel
+  engineering --> sandbox["Disposable regression container<br/>no network or credentials"]
   ssm["Host administration<br/>AWS Systems Manager"] --> worker
 ```
 

@@ -16,23 +16,24 @@ Live link: [reporter-to-release.pallabdas.me](https://reporter-to-release.pallab
 
 Reporter-to-Release gives people a way to report a bug and stay involved until its fix works for them. The desk groups duplicate reports, records a failing reproduction, asks the reporter to confirm it, and requires human review before a production release can close the loop. If a reporter still sees the failure, the bug reopens.
 
-This repository contains the web app, guarded workflow API, durable ledger, Switch worker, deployment scripts, tests, and documentation. Web intake, AI triage, and the AWS Switch handoff are live. Telegram and Slack are deferred. The home page is one small screen: a person describes a bug and reads the AI triage beside it. The operator workspace at `/desk` opens an isolated demo with clearly labeled simulated progress.
+This repository contains the web app, guarded workflow API, durable ledger, Switch concierge, isolated AWS engineering service, production recorder, tests, and documentation. Web intake, AI triage, model-generated ShopLite regressions and draft fixes are live. Telegram and Slack are deferred. The home page lets a person describe a bug and read advisory triage beside it; `/desk` opens the operator workspace with a labeled isolated demo.
+
+The controlled backend acceptance produced a real failing regression, original-reporter confirmation and [draft fix PR #4](https://github.com/PDGamerSG/Reporter-to-Release/pull/4), with 113 passing tests and all CI jobs green. This is a controlled test of the live backend. Human approval, merge and reporter-confirmed production resolution remain required. [The evidence record](docs/evidence/2026-11-07-backend-acceptance.json) contains actual revisions and measured output.
 
 Built for Flip the Switch, November 4–7, 2026. This repository's implementation began November 7. The concept and generic Switch client come from earlier research; [the contribution record](docs/EVENT_CONTRIBUTION.md) identifies that baseline and the new work without counting earlier benchmarks as event validation.
 
 ## Features
 
-| Feature                | What it does                                                                                                                  |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Web bug reports        | Accepts observed behavior and gives each reporter a private tracking link.                                                    |
-| AI triage              | Returns an advisory summary, severity, likely cause, reproduction steps, and regression test idea from a server-side proxy.   |
-| Privacy airlock        | Redacts known personal-data and secret patterns, discards raw input, and holds detected instructions for human review.        |
-| Duplicate clusters     | Links similar reports so affected people share evidence and release updates.                                                  |
-| Proof before fixing    | Requires reproduction evidence and original-reporter confirmation before a fix can start.                                     |
-| Human review           | Checks the reviewed PR head; sensitive paths require two verified GitHub humans, including a code owner.                      |
-| Release confirmation   | Uses signed production deployment evidence and commit ancestry, then accepts reporter confirmation or reopening.              |
-| Durable delivery       | Persists workflow state and retryable jobs in Postgres; the AWS worker relays sanitized dossiers through owned Switch rooms.  |
-| Isolated demonstration | Lets visitors explore the lifecycle and reproduce ShopLite's actual coupon calculation defect without changing the live desk. |
+| Feature                | What it does                                                                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Web bug reports        | Accepts observed behavior and gives each reporter a private tracking link.                                                                        |
+| AI triage              | Returns an advisory summary, severity, likely cause, reproduction steps, and regression test idea from a server-side proxy.                       |
+| Privacy airlock        | Redacts known personal-data and secret patterns, discards raw input, and holds detected instructions for human review.                            |
+| Duplicate clusters     | Links similar reports so affected people share evidence and release updates.                                                                      |
+| Proof before fixing    | AWS model stages measure a failing ShopLite regression, require the original reporter, and test a bounded draft patch in a networkless container. |
+| Human review           | Checks the reviewed PR head; sensitive paths require two verified GitHub humans, including a code owner.                                          |
+| Release delivery       | Verifies the production revision, alias, health and ancestry; Postgres-backed jobs deliver updates for reporter confirmation or reopening.        |
+| Isolated demonstration | Lets visitors explore the lifecycle and reproduce ShopLite's actual coupon calculation defect without changing the live desk.                     |
 
 ## How it works
 
@@ -49,10 +50,15 @@ flowchart TB
   worker <--> rooms["Owned intake and engineering rooms<br/>Switch on AWS"]
   api --> github["Issues and commit comparison<br/>GitHub"]
   github -.-> api
-  runtime["Engineering model runtimes<br/>provider sign-in pending"] -.-> rooms
+  runtime["Engineering model stages<br/>Python on AWS, Meta API"] <--> rooms
+  runtime --> api
+  runtime --> sandbox["Measured tests and quality checks<br/>networkless Docker container"]
+  runtime --> github
+  recorder["Trusted-main production recorder<br/>GitHub Actions"] --> vercel["Exact revision, alias and health<br/>Vercel production"]
+  recorder --> github
 ```
 
-The API checks authority and lifecycle prerequisites on every write. The worker claims delivery jobs, creates a sanitized issue/dossier, and records acknowledgements. Signed GitHub reviews, merges, and production deployments supply release evidence; early deployment events are retained for later reconciliation. Engineering runtimes are not active yet. [Architecture notes](docs/ARCHITECTURE.md) describe the boundaries, request flow, and data model.
+The API checks authority and lifecycle prerequisites on every write. The concierge delivers sanitized dossiers through Switch. The engineering service measures regressions and patches, while the original reporter controls confirmation and humans control approval and merge. After successful main CI, the recorder verifies the exact Vercel release before publishing GitHub deployment evidence; GitHub signs the webhook consumed by the ledger. [Architecture notes](docs/ARCHITECTURE.md) describe the boundaries, request flow, and data model.
 
 ## Screenshots
 
@@ -85,6 +91,7 @@ Captured from the live custom domain on November 7, 2026 in Chromium at 1440 × 
 | TypeScript / Zod                  | Domain types and request validation                       | Apache-2.0 / MIT                        |
 | Neon Postgres / Neon driver       | Durable versioned ledger                                  | PostgreSQL License / MIT                |
 | Python / HTTPX / websockets       | Persistent Switch worker                                  | PSF / BSD-3-Clause / BSD-3-Clause       |
+| Meta Model API                    | Advisory triage and bounded engineering model stages      | Hosted service terms                    |
 | Switch                            | Agent identities, rooms, addressing, and dossier handoffs | Apache-2.0 with modified Commons Clause |
 | Lucide / Manrope / IBM Plex Mono  | Icons and interface typography                            | ISC / OFL-1.1 / OFL-1.1                 |
 | Vitest / Playwright / axe adapter | Domain, integration, browser, and accessibility checks    | MIT / Apache-2.0 / MPL-2.0              |
@@ -116,7 +123,7 @@ npm audit --audit-level=moderate
 npm run build
 uv sync --project worker --extra test --frozen
 uv run --project worker pytest -c worker/pyproject.toml worker/tests -q
-uv run --project worker ruff check worker/src/r2r_worker worker/tests
+uv run --project worker ruff check worker/src/r2r_worker worker/src/r2r_engineering worker/tests
 ```
 
 For the 16 browser scenarios, install Chromium, start the built app on port 3107 in another terminal, and run Playwright:
@@ -128,7 +135,7 @@ npm run start -- --port 3107
 npm run test:e2e
 ```
 
-The verified implementation passes 66 TypeScript tests, 7 worker tests, and 16 browser scenarios. [CI](.github/workflows/ci.yml) runs checks, audit, build, and browser acceptance on main pushes and PRs using isolated configuration. The [test plan](docs/testing/test-plan.md) separates live acceptance evidence from simulations.
+Backend checkpoint `db5c014` passed 112 TypeScript tests, 20 Python unit tests, three actual Docker integration tests and 16 browser scenarios. The generated fix adds one regression, bringing its draft PR to 113 passing TypeScript tests. [CI](.github/workflows/ci.yml) also runs formatting, lint, types, audit and production build. The [test plan](docs/testing/test-plan.md) separates live acceptance evidence from simulations and explains how to run the Docker checks.
 
 To run the seeded failing-to-passing example:
 
@@ -141,26 +148,27 @@ npm run demo:reproduce -- --fixed
 
 ### Deploy
 
-The live app runs on Vercel with Neon Postgres. The Switch server and persistent Python worker run on AWS EC2 in `ap-southeast-2`, behind Caddy HTTPS. Namecheap connects the custom hostnames. Main is connected to Vercel's production deployment integration.
+The live app runs on Vercel with Neon Postgres. Switch, the concierge and the engineering service run on AWS EC2 in `ap-southeast-2`, with Caddy HTTPS for Switch. Namecheap connects the custom hostnames. Vercel builds main; a separate trusted-main workflow verifies the release and records signed GitHub deployment evidence automatically.
 
 Configure production secrets, initialize the ledger with `npm run db:init`, deploy the intended revision, and verify HTTPS plus the immutable release's assets. Use [deployment and operations](docs/operations/deployment.md) for the checked-in host setup, SSM worker deployment, GitHub webhook, recovery, and shutdown steps. AWS resources incur charges while retained.
 
 ## Repository map
 
-| Path                                | What it holds                                                                         |
-| ----------------------------------- | ------------------------------------------------------------------------------------- |
-| `src/app/`                          | One-page reporter home, `/desk`, tracking page, ShopLite, and API route.              |
-| `src/components/`                   | Reporter page, operator workspace, tracker, dialogs, and lifecycle UI.                |
-| `src/lib/domain/`                   | Airlock, clustering, guarded transitions, audit events, and outbox.                   |
-| `src/lib/ai/`                       | Server-side model proxy, cached prompt prefix, and spending guard.                    |
-| `src/lib/store/`                    | Memory, local file, and Postgres compare-and-swap stores.                             |
-| `src/lib/integrations/`             | Signed GitHub review, merge, and deployment relay.                                    |
-| `worker/src/r2r_worker/`            | Project-specific Switch adapter and native identity boundary.                         |
-| `worker/src/switchkit/`             | Attributed generic protocol client from earlier research.                             |
-| `templates/`                        | Desk and per-bug fix-room templates for later provider setup.                         |
-| `scripts/`, `infra/`, `migrations/` | Local setup, executable regression, AWS deployment, container configuration, and SQL. |
-| `tests/`, `e2e/`, `worker/tests/`   | Application, browser, and worker checks.                                              |
-| `docs/`, `.github/`                 | Documentation, captured screenshots, code owners, and CI.                             |
+| Path                                | What it holds                                                                                  |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `src/app/`                          | One-page reporter home, `/desk`, tracking page, ShopLite, and API route.                       |
+| `src/components/`                   | Reporter page, operator workspace, tracker, dialogs, and lifecycle UI.                         |
+| `src/lib/domain/`                   | Airlock, clustering, guarded transitions, audit events, and outbox.                            |
+| `src/lib/ai/`                       | Server-side model proxy, cached prompt prefix, and spending guard.                             |
+| `src/lib/store/`                    | Memory, local file, and Postgres compare-and-swap stores.                                      |
+| `src/lib/integrations/`             | Signed GitHub review, merge, and deployment relay.                                             |
+| `worker/src/r2r_worker/`            | Project-specific Switch adapter and native identity boundary.                                  |
+| `worker/src/r2r_engineering/`       | AWS orchestration, model stages, networkless sandbox, durable receipts and draft PR publisher. |
+| `worker/src/switchkit/`             | Attributed generic protocol client from earlier research.                                      |
+| `templates/`                        | Reference desk and per-bug room role descriptions.                                             |
+| `scripts/`, `infra/`, `migrations/` | Local setup, executable regression, AWS deployment, container configuration, and SQL.          |
+| `tests/`, `e2e/`, `worker/tests/`   | Application, browser, and worker checks.                                                       |
+| `docs/`, `.github/`                 | Documentation, captured screenshots, code owners, and CI.                                      |
 
 ## Documentation
 
@@ -170,6 +178,8 @@ Configure production secrets, initialize the ledger with `npm run db:init`, depl
 - [Configuration](docs/CONFIGURATION.md): environment variables and credentials.
 - [API](docs/api/README.md): public, owner, worker, and signed webhook endpoints.
 - [Deployment and operations](docs/operations/deployment.md): AWS, Vercel, DNS, recovery, and shutdown.
+- [Engineering runtime](docs/operations/engineering-runtime.md): role handoffs, sandbox, call limits, draft PRs and recovery.
+- [Production recorder](docs/operations/production-recorder.md): exact-revision verification and signed release evidence.
 - [Threat model](docs/security/threat-model.md): controls and trust assumptions.
 - [Test plan](docs/testing/test-plan.md): checks, CI, and evidence limits.
 - [Design](docs/DESIGN.md): interface tokens, responsiveness, and accessibility.
@@ -178,15 +188,15 @@ Configure production secrets, initialize the ledger with `npm run db:init`, depl
 
 ## Known limits
 
-- Engineering model runtimes need provider sign-in. The registered manager destination does not run a model by itself; no live autonomous fix PR is claimed.
+- Autonomous engineering is restricted to normal ShopLite calculation code and a per-bug regression. Other reports receive an honest human-investigation note. The active AWS service uses one Meta provider; the optional Bedrock adapter was blocked by account quota for real-work requests.
 - Telegram and Slack are deferred. Web reporters read updates on their private tracking page; email and push notifications are not implemented.
 - AI triage is advisory. It never changes severity or workflow state, and it reads only the sanitized dossier, so it cannot see redacted details or the codebase. Its likely cause is an unverified hypothesis.
 - The app's spending cap counts this app's calls only. It cannot read the provider's credit balance, so check that in the Model API dashboard.
 - Redaction and instruction detection are heuristic. Voice reports and screenshot uploads are not supported by the web form.
-- Authorized engineering actors supply test output and changed paths. The ledger does not execute those tests or independently verify that evidence.
+- The AWS service executes and measures its tests in isolated containers. The ledger still trusts authorized evidence submissions; it does not independently attest every command or derive changed paths from GitHub. Human review remains required.
 - Owner access uses a shared key. Sensitive approval gates require verified GitHub identities; a second authorized human must be configured for those fixes.
-- The complete release/reopen sequence is proven in isolated tests and the labeled demo. Live acceptance proves intake, tracking, issue creation, Switch delivery, and webhook connectivity.
-- Vercel builds main automatically; verified production releases must also be recorded in GitHub Deployments for the signed release relay. [Operations](docs/operations/deployment.md) describes that step.
+- The complete release/reopen sequence is proven in isolated tests and the labeled demo. Live controlled acceptance additionally proves model-generated reproduction and draft fix, reporter gating, CI and automatic production recording. PR #4 awaits human review and merge; no released customer resolution is claimed.
+- Production recording depends on trusted-main CI, Vercel API access and the signed GitHub webhook. A failed check, wrong alias or unhealthy release is left unrecorded. [Operations](docs/operations/production-recorder.md) describes recovery.
 - One JSON ledger per workspace and one AWS host limit scale and availability. Delivery can repeat across a crash at an external-send boundary; backup/restore operations remain the owner's responsibility.
 
 ## License

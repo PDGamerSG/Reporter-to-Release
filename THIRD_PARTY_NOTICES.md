@@ -44,4 +44,4 @@ The final documentation format and checker come from [Readme-pro-max](https://gi
 
 ## Worker dependencies and services
 
-The Python worker uses HTTPX (BSD-3-Clause), websockets (BSD-3-Clause), and python-dotenv (BSD-3-Clause). Locked versions appear in [uv.lock](worker/uv.lock) and the exported [requirements](worker/requirements.txt); upstream package distributions carry their license texts. The hosted stack also uses Python, Postgres, Docker tooling, and Caddy under their respective upstream licenses.
+The Python services use HTTPX (BSD-3-Clause), websockets (BSD-3-Clause), python-dotenv (BSD-3-Clause), and Boto3/Botocore (Apache-2.0) for the optional Bedrock adapter. Locked versions appear in [uv.lock](worker/uv.lock) and the exported [requirements](worker/requirements.txt); upstream package distributions carry their license texts. The hosted stack also uses Python, Postgres, Docker tooling, and Caddy under their respective upstream licenses. The active Meta Model API is an external hosted service governed by its provider terms; no model weights are bundled in this repository.
