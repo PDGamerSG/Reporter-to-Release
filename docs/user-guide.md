@@ -1,0 +1,50 @@
+# User guide
+
+## Report a bug
+
+Open [the web form](https://reporter-to-release.pallabdas.me/report). Describe what went wrong, how to repeat it, the expected result, and the browser or device involved. Submit observed behavior without passwords, customer details, or instructions for agents.
+
+Keep the **Track your report** link shown after submission. Its URL fragment contains a private capability. Anyone holding the complete link can read that report and answer its confirmation questions. The application cannot recover a lost token from its stored hash.
+
+The tracker shows receipt, reproduction evidence, review, deployment, and reporter verification. When a reproduction card arrives, confirm only if it matches the problem you saw. After production deployment, confirm whether the fix works. A rejection reopens the cluster. Web reporters receive updates on this page; email, chat, and browser push notifications are not enabled.
+
+Instruction-bearing reports are held in the Airlock. Their raw text is discarded. An owner must obtain clean facts before releasing the report to engineering. Detection is heuristic and does not guarantee removal of all sensitive data.
+
+Sources: [form](../src/components/report-form.tsx), [tracker](../src/components/tracker.tsx), [workflow](../src/lib/domain/workflow.ts).
+
+## Explore the demo
+
+The [home page](https://reporter-to-release.pallabdas.me/) opens an isolated, seeded demo for each visitor. The purple demo notice identifies synthetic reports, agents, and releases. Searches, filters, dossier dialogs, reset, and example lifecycle buttons operate within that private workspace.
+
+1. Open a bug from the inbox and inspect its dossier, evidence, activity, and reporters.
+2. Submit a new report from the demo or use `/report?mode=demo`.
+3. Follow its example controls from reproduction to reporter confirmation, fix, human review, merge, production deployment, and final verification.
+4. Use **Reset demo** in the workflow guide to restore the examples.
+
+These controls simulate workflow facts. They do not invoke a model, run a test, create a PR, or deploy a fix. Source: [demo engine](../src/lib/demo.ts).
+
+## Reproduce the ShopLite defect
+
+Open [ShopLite](https://reporter-to-release.pallabdas.me/shoplite). Apply `SAVE300` to the ₹200 cart. The seeded buggy calculation shows −₹100. Select **Fixed version** to clamp the amount to ₹0. Increasing quantity changes the total using the same calculation function.
+
+ShopLite is a sandbox with no real payment processing. Its report link enters the isolated demo. Run the actual failing and passing assertion from the command line as described in the [test plan](testing/test-plan.md).
+
+## Operate the live desk
+
+Select **Open live workspace** and enter the configured owner access key. The status badge changes to **Live workspace**. Use **Workspace access** and **Return to the demo** to sign out. Owner access is a shared key for this deployment; there are no individual web accounts or SSO.
+
+| View                 | Use                                                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Overview / Bug inbox | Search, filter, and open clusters. Impact counts reflect linked reports.                                                 |
+| Activity             | Inspect recorded workflow decisions and actor attribution.                                                               |
+| Releases             | See production release evidence and reporter confirmation state.                                                         |
+| Agent crew           | Read role responsibilities and access boundaries. Provider labels describe intended roles, not proof of active runtimes. |
+| Airlock              | Review held reports and replace unsafe input with clean observed facts.                                                  |
+| Connections          | Read database, Switch heartbeat, GitHub relay, and deferred chat status.                                                 |
+| Workflow guide       | Review the required evidence and human/reporter gates.                                                                   |
+
+Record reproduction and fix evidence in the dossier dialog. The ledger requires the original reporter's confirmation before fixing and human review before a signed merge can advance it. A successful signed production deployment containing that merge unlocks release verification. Owner buttons cannot impersonate the live GitHub merge/deployment relay.
+
+**Current operating limit:** the AWS concierge worker is running, but engineering model runtimes need sign-in through Switch Console. Until then, a human owner can provide the evidence and perform engineering work through the same guarded workflow. No automatic model-written fix has been demonstrated live.
+
+Sources: [dashboard](../src/components/dashboard.tsx), [API](../src/lib/api.ts), [relay](../src/lib/integrations/github.ts).
